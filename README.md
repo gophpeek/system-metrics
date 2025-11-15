@@ -66,6 +66,8 @@ if ($result->isSuccess()) {
 Detect OS, architecture, virtualization, containers, and cgroups:
 
 ```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
 $env = SystemMetrics::environment()->getValue();
 
 // OS Info
@@ -75,19 +77,21 @@ $env->os->version;            // "22.04"
 
 // Architecture
 $env->architecture->kind->value;    // "x86_64" or "arm64"
-$env->architecture->rosettaTranslation; // true on M1 Macs running x86_64
+$env->architecture->raw;            // Raw architecture string
 
 // Virtualization
-$env->virtualization->type->value;  // "kvm", "vmware", "none"
-$env->virtualization->isVirtual;    // true/false
+$env->virtualization->type->value;  // "bare_metal", "virtual_machine", "unknown"
+$env->virtualization->vendor;       // "KVM", "VMware", null
+$env->virtualization->rawIdentifier; // Raw hypervisor identifier or null
 
 // Container Detection
 $env->containerization->insideContainer; // true/false
 $env->containerization->type->value;     // "docker", "kubernetes", "none"
 
 // Cgroups
-$env->cgroup->version->value;  // "v1", "v2", "none"
-$env->cgroup->detected;        // true/false
+$env->cgroup->version->value;  // "v1", "v2", "none", "unknown"
+$env->cgroup->cpuPath;         // "/sys/fs/cgroup/cpu" or null
+$env->cgroup->memoryPath;      // "/sys/fs/cgroup/memory" or null
 ```
 
 ### ✅ CPU Metrics
@@ -95,6 +99,8 @@ $env->cgroup->detected;        // true/false
 Get raw CPU time counters (in ticks):
 
 ```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
 $cpu = SystemMetrics::cpu()->getValue();
 
 // Total CPU time across all cores
@@ -119,6 +125,8 @@ foreach ($cpu->perCore as $core) {
 Get memory usage (all values in bytes):
 
 ```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
 $mem = SystemMetrics::memory()->getValue();
 
 // Physical Memory
@@ -145,6 +153,8 @@ $mem->swapUsedPercentage(); // Swap usage %
 Get system load average without needing delta calculations:
 
 ```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
 $load = SystemMetrics::loadAverage()->getValue();
 
 // Raw load average values (number of processes in run queue)
@@ -228,6 +238,8 @@ $stats = ProcessMetrics::stop($trackerId)->getValue();
 Windows is **not supported**. Attempting to use this library on Windows will return error results:
 
 ```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
 $result = SystemMetrics::cpu();
 if ($result->isFailure()) {
     // On Windows: "Unsupported operating system: Windows"
@@ -244,6 +256,8 @@ This library provides **raw counters only**, not calculated percentages. You nee
 4. Calculate delta: `(busy2 - busy1) / (total2 - total1) * 100`
 
 ```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
 // ❌ Wrong - no instant percentage
 $cpu = SystemMetrics::cpu()->getValue();
 // There's no $cpu->usagePercentage() method
@@ -312,6 +326,8 @@ sw_vers -productVersion     # OS version
 Modern macOS versions (especially Apple Silicon) have **deprecated** `kern.cp_time` and `kern.cp_times` sysctls:
 
 ```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
 $cpu = SystemMetrics::cpu()->getValue();
 // On Apple Silicon: $cpu->total->user may be 0
 // The library won't fail, but CPU counters will be zero
@@ -337,6 +353,8 @@ macOS uses **dynamic swap**, creating/removing swap files on-demand. Swap metric
 If your user lacks permission to read `/proc` or execute `sysctl`:
 
 ```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
 $result = SystemMetrics::cpu();
 // Result will be failure with InsufficientPermissionsException
 ```
