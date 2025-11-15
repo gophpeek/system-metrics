@@ -5,6 +5,36 @@ All notable changes to `system-metrics` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.1.0 - 2025-01-XX
+
+### Added
+- **Process-Level Monitoring**: Complete process resource tracking system
+  - `ProcessMetrics` facade for stateful tracking with start/sample/stop workflow
+  - `ProcessTracker` class for object-oriented process monitoring
+  - Support for tracking individual processes and process groups (parent + children)
+  - Statistical aggregation: current, peak, and average resource usage
+  - Manual sampling support for detailed statistics
+  - `ProcessSnapshot`: Point-in-time process metrics (PID, PPID, CPU, memory, threads)
+  - `ProcessDelta`: Delta calculations with CPU usage percentage
+  - `ProcessStats`: Statistical aggregation with sample count and duration
+  - `ProcessGroupSnapshot`: Process group metrics with aggregation methods
+  - Linux support via `/proc/{pid}/stat` parsing
+  - macOS support via `ps` and `pgrep` commands
+  - Composite source with automatic platform detection
+  - Actions: `ReadProcessMetricsAction`, `ReadProcessGroupMetricsAction`
+- 52 new comprehensive unit tests for process monitoring (225 total tests, 547 assertions)
+
+### Changed
+- Updated README with process monitoring documentation and examples
+- Removed "Process-Level Metrics not available" limitation from documentation
+
+### Technical Details
+- PHPStan Level 9 compliance maintained (0 errors)
+- All DTOs use readonly classes for immutability
+- Railway-oriented programming with Result<T> pattern
+- Platform-specific implementations with graceful fallback
+- Best-effort child process enumeration
+
 ## 1.0.0 - 2025-01-XX
 
 ### Added

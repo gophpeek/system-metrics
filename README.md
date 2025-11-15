@@ -140,6 +140,51 @@ $mem->swapUsedBytes;        // Used swap
 $mem->swapUsedPercentage(); // Swap usage %
 ```
 
+### ✅ Process-Level Monitoring
+
+Monitor resource usage for individual processes or process groups:
+
+```php
+use PHPeek\SystemMetrics\ProcessMetrics;
+
+// Start tracking a process
+$trackerId = ProcessMetrics::start(1234)->getValue(); // Returns tracker ID
+
+// Optionally take manual samples for better statistics
+ProcessMetrics::sample($trackerId);
+sleep(1);
+ProcessMetrics::sample($trackerId);
+
+// Stop and get statistics
+$stats = ProcessMetrics::stop($trackerId)->getValue();
+
+// Current, Peak, and Average values
+echo "Current Memory: " . $stats->current->memoryRssBytes / 1024**2 . " MB\n";
+echo "Peak Memory: " . $stats->peak->memoryRssBytes / 1024**2 . " MB\n";
+echo "Average Memory: " . $stats->average->memoryRssBytes / 1024**2 . " MB\n";
+echo "Samples collected: {$stats->sampleCount}\n";
+
+// Get a one-time snapshot without tracking
+$snapshot = ProcessMetrics::snapshot(1234)->getValue();
+echo "Memory RSS: {$snapshot->resources->memoryRssBytes} bytes\n";
+
+// Monitor process group (parent + all children)
+$group = ProcessMetrics::group(1234)->getValue();
+echo "Total processes: {$group->totalProcessCount()}\n";
+echo "Total memory: {$group->aggregateMemoryRss()} bytes\n";
+
+// Track process group with children
+$trackerId = ProcessMetrics::start(1234, includeChildren: true)->getValue();
+// ... work happens ...
+$stats = ProcessMetrics::stop($trackerId)->getValue();
+```
+
+**Use cases:**
+- Queue workers: Monitor resource usage from job start to completion
+- Spawned processes: Track ffmpeg, node.js, or other binaries launched by your application
+- Memory leak detection: Track peak and average memory usage over time
+- Process groups: Monitor parent + all child processes together
+
 ## What You Cannot Do
 
 ### ❌ Windows Support
@@ -184,10 +229,6 @@ Each method call reads from the system **at that moment**. There's no built-in s
 ### ❌ Historical Data
 
 The library only returns **current values**. No history, trends, or time series data.
-
-### ❌ Process-Level Metrics
-
-Only **system-wide metrics** are available. No per-process CPU or memory usage (use `proc_open()` with `ps` or `/proc/{pid}/` for that).
 
 ## Permission Requirements
 
