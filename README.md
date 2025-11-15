@@ -17,14 +17,6 @@ echo "CPU Cores: {$overview->cpu->coreCount()}\n";
 echo "Memory: " . round($overview->memory->usedPercentage(), 1) . "%\n";
 ```
 
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/system-metrics.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/system-metrics)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
-
 ## Quick Start
 
 ### Installation
@@ -37,7 +29,9 @@ composer require gophpeek/system-metrics
 
 - **PHP 8.3+** (uses modern readonly classes)
 - **Linux or macOS** (Windows not supported)
-- **Read permissions** for `/proc`, `/sys` (Linux) or `sysctl`, `vm_stat` commands (macOS)
+- **System commands** available:
+  - Linux: Read access to `/proc`, `/sys` filesystems
+  - macOS: `sysctl`, `vm_stat`, `sw_vers` commands (pre-installed)
 
 ### 30-Second Example
 
@@ -413,7 +407,7 @@ Once created, values cannot be modified.
 
 ## Design Principles
 
-1. **Pure PHP** - No extensions or system dependencies required
+1. **Pure PHP** - No PHP extensions or Composer packages required
 2. **Strict Types** - `declare(strict_types=1)` everywhere
 3. **Immutable DTOs** - Readonly classes prevent mutations
 4. **Result Pattern** - No uncaught exceptions, explicit error handling
@@ -426,7 +420,7 @@ Once created, values cannot be modified.
 - **89.9% Test Coverage** - Comprehensive test suite
 - **PSR-12** - Laravel Pint code style
 - **PHP 8.3+** - Modern language features
-- **Zero Dependencies** - No external packages
+- **Zero Composer Dependencies** - No external PHP packages
 
 ## Testing
 
