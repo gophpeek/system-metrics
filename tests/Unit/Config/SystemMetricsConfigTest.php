@@ -27,7 +27,8 @@ describe('SystemMetricsConfig', function () {
     });
 
     it('returns custom EnvironmentDetector when set', function () {
-        $customDetector = new class implements EnvironmentDetector {
+        $customDetector = new class implements EnvironmentDetector
+        {
             public function detect(): \PHPeek\SystemMetrics\DTO\Result
             {
                 return \PHPeek\SystemMetrics\DTO\Result::success(
@@ -80,7 +81,8 @@ describe('SystemMetricsConfig', function () {
     });
 
     it('returns custom CpuMetricsSource when set', function () {
-        $customSource = new class implements CpuMetricsSource {
+        $customSource = new class implements CpuMetricsSource
+        {
             public function read(): \PHPeek\SystemMetrics\DTO\Result
             {
                 return \PHPeek\SystemMetrics\DTO\Result::success(
@@ -115,7 +117,8 @@ describe('SystemMetricsConfig', function () {
     });
 
     it('returns custom MemoryMetricsSource when set', function () {
-        $customSource = new class implements MemoryMetricsSource {
+        $customSource = new class implements MemoryMetricsSource
+        {
             public function read(): \PHPeek\SystemMetrics\DTO\Result
             {
                 return \PHPeek\SystemMetrics\DTO\Result::success(
@@ -139,7 +142,8 @@ describe('SystemMetricsConfig', function () {
     });
 
     it('resets all configuration to defaults', function () {
-        $customDetector = new class implements EnvironmentDetector {
+        $customDetector = new class implements EnvironmentDetector
+        {
             public function detect(): \PHPeek\SystemMetrics\DTO\Result
             {
                 return \PHPeek\SystemMetrics\DTO\Result::success(
@@ -187,7 +191,8 @@ describe('SystemMetricsConfig', function () {
     });
 
     it('persists custom configuration across multiple get calls', function () {
-        $customDetector = new class implements EnvironmentDetector {
+        $customDetector = new class implements EnvironmentDetector
+        {
             public function detect(): \PHPeek\SystemMetrics\DTO\Result
             {
                 return \PHPeek\SystemMetrics\DTO\Result::success(

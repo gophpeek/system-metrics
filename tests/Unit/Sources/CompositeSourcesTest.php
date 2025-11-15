@@ -19,7 +19,6 @@ use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuSnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuTimes;
 use PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot;
 use PHPeek\SystemMetrics\DTO\Result;
-use PHPeek\SystemMetrics\Exceptions\UnsupportedOperatingSystemException;
 use PHPeek\SystemMetrics\Sources\Cpu\CompositeCpuMetricsSource;
 use PHPeek\SystemMetrics\Sources\Environment\CompositeEnvironmentDetector;
 use PHPeek\SystemMetrics\Sources\Memory\CompositeMemoryMetricsSource;
