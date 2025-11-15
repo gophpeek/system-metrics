@@ -123,12 +123,13 @@ echo "Capacity (15 min): " . round($normalized->fifteenMinutesPercentage(), 1) .
 $process = ProcessMetrics::snapshot(getmypid())->getValue();
 
 echo "=== CURRENT PROCESS (PID: {$process->pid}) ===\n";
-echo "Parent PID: {$process->ppid}\n";
-echo "CPU User: {$process->resources->cpuUserTicks} ticks\n";
-echo "CPU System: {$process->resources->cpuSystemTicks} ticks\n";
+echo "Parent PID: {$process->parentPid}\n";
+echo "CPU User: {$process->resources->cpuTimes->user} ticks\n";
+echo "CPU System: {$process->resources->cpuTimes->system} ticks\n";
 echo "Memory RSS: " . round($process->resources->memoryRssBytes / 1024**2, 2) . " MB\n";
 echo "Memory VMS: " . round($process->resources->memoryVmsBytes / 1024**2, 2) . " MB\n";
 echo "Threads: {$process->resources->threadCount}\n";
+echo "Open Files: {$process->resources->openFileDescriptors}\n";
 ```
 
 **Output example:**
@@ -169,6 +170,7 @@ CPU System: 123 ticks
 Memory RSS: 45.32 MB
 Memory VMS: 128.50 MB
 Threads: 8
+Open Files: 25
 ```
 
 ## What You Can Do
