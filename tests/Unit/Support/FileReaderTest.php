@@ -121,4 +121,63 @@ describe('FileReader', function () {
             unlink($tempFile);
         }
     });
+
+    it('can read file as lines', function () {
+        $tempFile = tempnam(sys_get_temp_dir(), 'test_');
+        file_put_contents($tempFile, "line 1\nline 2\n\nline 3\n");
+
+        try {
+            $reader = new FileReader;
+            $result = $reader->readLines($tempFile);
+
+            expect($result->isSuccess())->toBeTrue();
+            $lines = $result->getValue();
+            expect($lines)->toBeArray();
+            // array_filter preserves keys, so we get [0, 1, 3] not [0, 1, 2]
+            expect(array_values($lines))->toBe(['line 1', 'line 2', 'line 3']);
+        } finally {
+            unlink($tempFile);
+        }
+    });
+
+    it('readLines filters empty lines', function () {
+        $tempFile = tempnam(sys_get_temp_dir(), 'test_');
+        file_put_contents($tempFile, "line 1\n\n\nline 2\n");
+
+        try {
+            $reader = new FileReader;
+            $result = $reader->readLines($tempFile);
+
+            expect($result->isSuccess())->toBeTrue();
+            $lines = $result->getValue();
+            expect($lines)->toHaveCount(2);
+        } finally {
+            unlink($tempFile);
+        }
+    });
+
+    it('readLines propagates read failures', function () {
+        $reader = new FileReader;
+        $result = $reader->readLines('/non/existent/file.txt');
+
+        expect($result->isFailure())->toBeTrue();
+        expect($result->getError())->toBeInstanceOf(FileNotFoundException::class);
+    });
+
+    it('exists returns true for existing readable file', function () {
+        $tempFile = tempnam(sys_get_temp_dir(), 'test_');
+        file_put_contents($tempFile, 'content');
+
+        try {
+            $reader = new FileReader;
+            expect($reader->exists($tempFile))->toBeTrue();
+        } finally {
+            unlink($tempFile);
+        }
+    });
+
+    it('exists returns false for non-existent file', function () {
+        $reader = new FileReader;
+        expect($reader->exists('/non/existent/file.txt'))->toBeFalse();
+    });
 });
