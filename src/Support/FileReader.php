@@ -22,16 +22,19 @@ final class FileReader implements FileReaderInterface
     public function read(string $path): Result
     {
         if (! file_exists($path)) {
+            /** @var Result<string> */
             return Result::failure(FileNotFoundException::forPath($path));
         }
 
         if (! is_readable($path)) {
+            /** @var Result<string> */
             return Result::failure(InsufficientPermissionsException::forFile($path));
         }
 
         $contents = @file_get_contents($path);
 
         if ($contents === false) {
+            /** @var Result<string> */
             return Result::failure(InsufficientPermissionsException::forFile($path));
         }
 

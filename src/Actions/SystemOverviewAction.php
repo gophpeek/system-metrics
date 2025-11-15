@@ -30,6 +30,7 @@ final class SystemOverviewAction
             $error = $environmentResult->getError();
             assert($error !== null);
 
+            /** @var Result<SystemOverview> */
             return Result::failure($error);
         }
 
@@ -38,6 +39,7 @@ final class SystemOverviewAction
             $error = $cpuResult->getError();
             assert($error !== null);
 
+            /** @var Result<SystemOverview> */
             return Result::failure($error);
         }
 
@@ -46,6 +48,7 @@ final class SystemOverviewAction
             $error = $memoryResult->getError();
             assert($error !== null);
 
+            /** @var Result<SystemOverview> */
             return Result::failure($error);
         }
 

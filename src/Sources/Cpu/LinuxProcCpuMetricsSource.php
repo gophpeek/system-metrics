@@ -28,6 +28,7 @@ final class LinuxProcCpuMetricsSource implements CpuMetricsSource
             $error = $result->getError();
             assert($error !== null);
 
+            /** @var Result<\PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuSnapshot> */
             return Result::failure($error);
         }
 

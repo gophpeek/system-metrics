@@ -27,15 +27,18 @@ final class ProcessRunner
 
         if ($resultCode !== 0) {
             if ($resultCode === 127) {
+                /** @var Result<string> */
                 return Result::failure(
                     new SystemMetricsException("Command not found: {$command}")
                 );
             }
 
             if ($resultCode === 126) {
+                /** @var Result<string> */
                 return Result::failure(InsufficientPermissionsException::forCommand($command));
             }
 
+            /** @var Result<string> */
             return Result::failure(
                 new SystemMetricsException("Command failed with exit code {$resultCode}: {$command}")
             );

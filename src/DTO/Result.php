@@ -130,6 +130,7 @@ final readonly class Result
     public function map(callable $mapper): self
     {
         if ($this->isFailure()) {
+            /** @var Result<U> */
             return self::failure($this->getErrorAsserted());
         }
 

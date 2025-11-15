@@ -39,6 +39,7 @@ final class LinuxProcStatParser
                     $error = $result->getError();
                     assert($error !== null);
 
+                    /** @var Result<CpuSnapshot> */
                     return Result::failure($error);
                 }
                 $total = $result->getValue();
@@ -54,6 +55,7 @@ final class LinuxProcStatParser
                     $error = $result->getError();
                     assert($error !== null);
 
+                    /** @var Result<CpuSnapshot> */
                     return Result::failure($error);
                 }
                 $perCore[] = new CpuCoreTimes(
@@ -64,6 +66,7 @@ final class LinuxProcStatParser
         }
 
         if ($total === null) {
+            /** @var Result<CpuSnapshot> */
             return Result::failure(
                 ParseException::forFile('/proc/stat', 'No total CPU line found')
             );
@@ -86,6 +89,7 @@ final class LinuxProcStatParser
         $parts = preg_split('/\s+/', $line);
 
         if ($parts === false || count($parts) < 9) {
+            /** @var Result<CpuTimes> */
             return Result::failure(
                 ParseException::forFile('/proc/stat', 'Invalid CPU line format')
             );

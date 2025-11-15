@@ -31,6 +31,7 @@ final class LinuxMeminfoParser
         $swapFree = $values['SwapFree'] ?? 0;
 
         if ($total === null || $free === null) {
+            /** @var Result<MemorySnapshot> */
             return Result::failure(
                 ParseException::forFile('/proc/meminfo', 'Missing required fields')
             );

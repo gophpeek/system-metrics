@@ -28,6 +28,7 @@ final class MacOsSysctlParser
         $parts = preg_split('/[,\s]+/', $content);
 
         if ($parts === false || count($parts) < 4) {
+            /** @var Result<CpuTimes> */
             return Result::failure(
                 ParseException::forCommand('sysctl kern.cp_time', 'Invalid format')
             );
@@ -60,6 +61,7 @@ final class MacOsSysctlParser
         $parts = preg_split('/[,\s]+/', $content);
 
         if ($parts === false) {
+            /** @var Result<list<CpuCoreTimes>> */
             return Result::failure(
                 ParseException::forCommand('sysctl kern.cp_times', 'Invalid format')
             );
@@ -92,6 +94,7 @@ final class MacOsSysctlParser
         }
 
         if (empty($perCore)) {
+            /** @var Result<list<CpuCoreTimes>> */
             return Result::failure(
                 ParseException::forCommand('sysctl kern.cp_times', 'No core data found')
             );
@@ -112,6 +115,7 @@ final class MacOsSysctlParser
             $error = $totalResult->getError();
             assert($error !== null);
 
+            /** @var Result<CpuSnapshot> */
             return Result::failure($error);
         }
 
@@ -120,6 +124,7 @@ final class MacOsSysctlParser
             $error = $perCoreResult->getError();
             assert($error !== null);
 
+            /** @var Result<CpuSnapshot> */
             return Result::failure($error);
         }
 

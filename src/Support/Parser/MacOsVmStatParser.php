@@ -34,6 +34,7 @@ final class MacOsVmStatParser
         $swapOuts = $values['Swapouts'] ?? 0;
 
         if ($free === null || $active === null) {
+            /** @var Result<MemorySnapshot> */
             return Result::failure(
                 ParseException::forCommand('vm_stat', 'Missing required fields')
             );

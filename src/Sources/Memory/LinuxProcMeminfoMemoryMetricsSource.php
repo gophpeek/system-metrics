@@ -28,6 +28,7 @@ final class LinuxProcMeminfoMemoryMetricsSource implements MemoryMetricsSource
             $error = $result->getError();
             assert($error !== null);
 
+            /** @var Result<\PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot> */
             return Result::failure($error);
         }
 

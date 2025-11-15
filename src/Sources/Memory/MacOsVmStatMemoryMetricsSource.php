@@ -27,6 +27,7 @@ final class MacOsVmStatMemoryMetricsSource implements MemoryMetricsSource
             $error = $vmStatResult->getError();
             assert($error !== null);
 
+            /** @var Result<\PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot> */
             return Result::failure($error);
         }
 
@@ -36,6 +37,7 @@ final class MacOsVmStatMemoryMetricsSource implements MemoryMetricsSource
             $error = $hwMemsizeResult->getError();
             assert($error !== null);
 
+            /** @var Result<\PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot> */
             return Result::failure($error);
         }
 
@@ -45,6 +47,7 @@ final class MacOsVmStatMemoryMetricsSource implements MemoryMetricsSource
             $error = $pageSizeResult->getError();
             assert($error !== null);
 
+            /** @var Result<\PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot> */
             return Result::failure($error);
         }
 
