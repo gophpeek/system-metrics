@@ -23,7 +23,8 @@
       "Bash(composer require:*)",
       "Bash(vendor/bin/phpstan analyse:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(ps:*)"
     ],
     "deny": [],
     "ask": []

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PHPeek\SystemMetrics\Sources\LoadAverage;
 
+use PHPeek\SystemMetrics\Contracts\FileReaderInterface;
 use PHPeek\SystemMetrics\Contracts\LoadAverageSource;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Support\FileReader;
@@ -17,8 +18,8 @@ final readonly class LinuxProcLoadAverageSource implements LoadAverageSource
     private const LOADAVG_PATH = '/proc/loadavg';
 
     public function __construct(
-        private FileReader $fileReader = new FileReader,
-        private LinuxProcLoadavgParser $parser = new LinuxProcLoadavgParser,
+        private readonly FileReaderInterface $fileReader = new FileReader,
+        private readonly LinuxProcLoadavgParser $parser = new LinuxProcLoadavgParser,
     ) {}
 
     /**

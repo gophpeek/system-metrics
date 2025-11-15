@@ -9,7 +9,6 @@ use PHPeek\SystemMetrics\Contracts\FileReaderInterface;
 use PHPeek\SystemMetrics\Contracts\ProcessMetricsSource;
 use PHPeek\SystemMetrics\DTO\Metrics\Process\ProcessGroupSnapshot;
 use PHPeek\SystemMetrics\DTO\Result;
-use PHPeek\SystemMetrics\Exceptions\SystemMetricsException;
 use PHPeek\SystemMetrics\Support\FileReader;
 use PHPeek\SystemMetrics\Support\Parser\LinuxProcPidStatParser;
 
