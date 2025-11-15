@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PHPeek\SystemMetrics\Support;
 
+use PHPeek\SystemMetrics\Contracts\FileReaderInterface;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Exceptions\FileNotFoundException;
 use PHPeek\SystemMetrics\Exceptions\InsufficientPermissionsException;
@@ -11,7 +12,7 @@ use PHPeek\SystemMetrics\Exceptions\InsufficientPermissionsException;
 /**
  * Reads system files with proper error handling.
  */
-final class FileReader
+final class FileReader implements FileReaderInterface
 {
     /**
      * Read the entire contents of a file.

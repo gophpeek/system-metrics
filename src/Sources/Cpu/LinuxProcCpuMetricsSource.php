@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PHPeek\SystemMetrics\Sources\Cpu;
 
 use PHPeek\SystemMetrics\Contracts\CpuMetricsSource;
+use PHPeek\SystemMetrics\Contracts\FileReaderInterface;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Support\FileReader;
 use PHPeek\SystemMetrics\Support\Parser\LinuxProcStatParser;
@@ -15,7 +16,7 @@ use PHPeek\SystemMetrics\Support\Parser\LinuxProcStatParser;
 final class LinuxProcCpuMetricsSource implements CpuMetricsSource
 {
     public function __construct(
-        private readonly FileReader $fileReader = new FileReader,
+        private readonly FileReaderInterface $fileReader = new FileReader,
         private readonly LinuxProcStatParser $parser = new LinuxProcStatParser,
     ) {}
 
