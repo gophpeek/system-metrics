@@ -45,18 +45,130 @@ if ($result->isSuccess()) {
     $overview = $result->getValue();
 
     // Environment
-    echo $overview->environment->os->name;        // "Ubuntu"
-    echo $overview->environment->architecture->kind->value; // "x86_64"
+    echo "OS: " . $overview->environment->os->name . "\n";
+    echo "Architecture: " . $overview->environment->architecture->kind->value . "\n";
 
     // CPU (raw time counters in ticks)
-    echo $overview->cpu->coreCount();             // 8
-    echo $overview->cpu->total->user;             // 123456 ticks
+    echo "CPU Cores: " . $overview->cpu->coreCount() . "\n";
+    echo "CPU User Time: " . $overview->cpu->total->user . " ticks\n";
 
     // Memory (all values in bytes)
     $usedGB = $overview->memory->usedBytes / 1024**3;
-    echo round($usedGB, 2) . " GB";               // "8.42 GB"
-    echo $overview->memory->usedPercentage();     // 52.3
+    echo "Memory Used: " . round($usedGB, 2) . " GB\n";
+    echo "Memory Usage: " . round($overview->memory->usedPercentage(), 1) . "%\n";
 }
+```
+
+## Complete Example - All Metrics
+
+Get a complete snapshot of all available system metrics:
+
+```php
+use PHPeek\SystemMetrics\SystemMetrics;
+use PHPeek\SystemMetrics\ProcessMetrics;
+
+// ============================================
+// ENVIRONMENT DETECTION
+// ============================================
+$env = SystemMetrics::environment()->getValue();
+
+echo "=== ENVIRONMENT ===\n";
+echo "OS: {$env->os->name} {$env->os->version}\n";
+echo "Architecture: {$env->architecture->kind->value}\n";
+echo "Virtualization: {$env->virtualization->type->value}\n";
+echo "Container: " . ($env->containerization->insideContainer ? 'yes' : 'no') . "\n";
+echo "Cgroup: {$env->cgroup->version->value}\n\n";
+
+// ============================================
+// CPU METRICS (Raw Counters)
+// ============================================
+$cpu = SystemMetrics::cpu()->getValue();
+
+echo "=== CPU ===\n";
+echo "Cores: {$cpu->coreCount()}\n";
+echo "User Time: {$cpu->total->user} ticks\n";
+echo "System Time: {$cpu->total->system} ticks\n";
+echo "Idle Time: {$cpu->total->idle} ticks\n";
+echo "Total Time: {$cpu->total->total()} ticks\n";
+echo "Busy Time: {$cpu->total->busy()} ticks\n\n";
+
+// ============================================
+// MEMORY METRICS
+// ============================================
+$mem = SystemMetrics::memory()->getValue();
+
+echo "=== MEMORY ===\n";
+echo "Total: " . round($mem->totalBytes / 1024**3, 2) . " GB\n";
+echo "Used: " . round($mem->usedBytes / 1024**3, 2) . " GB (" . round($mem->usedPercentage(), 1) . "%)\n";
+echo "Available: " . round($mem->availableBytes / 1024**3, 2) . " GB (" . round($mem->availablePercentage(), 1) . "%)\n";
+echo "Swap Used: " . round($mem->swapUsedBytes / 1024**3, 2) . " GB (" . round($mem->swapUsedPercentage(), 1) . "%)\n\n";
+
+// ============================================
+// LOAD AVERAGE
+// ============================================
+$load = SystemMetrics::loadAverage()->getValue();
+$normalized = $load->normalized($cpu);
+
+echo "=== LOAD AVERAGE ===\n";
+echo "1 min: {$load->oneMinute} (raw)\n";
+echo "5 min: {$load->fiveMinutes} (raw)\n";
+echo "15 min: {$load->fifteenMinutes} (raw)\n";
+echo "Capacity (1 min): " . round($normalized->oneMinutePercentage(), 1) . "%\n";
+echo "Capacity (5 min): " . round($normalized->fiveMinutesPercentage(), 1) . "%\n";
+echo "Capacity (15 min): " . round($normalized->fifteenMinutesPercentage(), 1) . "%\n\n";
+
+// ============================================
+// PROCESS METRICS (Current Process)
+// ============================================
+$process = ProcessMetrics::snapshot(getmypid())->getValue();
+
+echo "=== CURRENT PROCESS (PID: {$process->pid}) ===\n";
+echo "Parent PID: {$process->ppid}\n";
+echo "CPU User: {$process->resources->cpuUserTicks} ticks\n";
+echo "CPU System: {$process->resources->cpuSystemTicks} ticks\n";
+echo "Memory RSS: " . round($process->resources->memoryRssBytes / 1024**2, 2) . " MB\n";
+echo "Memory VMS: " . round($process->resources->memoryVmsBytes / 1024**2, 2) . " MB\n";
+echo "Threads: {$process->resources->threadCount}\n";
+```
+
+**Output example:**
+```
+=== ENVIRONMENT ===
+OS: macOS 26.0.1
+Architecture: arm64
+Virtualization: bare_metal
+Container: no
+Cgroup: none
+
+=== CPU ===
+Cores: 10
+User Time: 1234567 ticks
+System Time: 567890 ticks
+Idle Time: 8901234 ticks
+Total Time: 10703691 ticks
+Busy Time: 1802457 ticks
+
+=== MEMORY ===
+Total: 64.00 GB
+Used: 32.50 GB (50.8%)
+Available: 31.50 GB (49.2%)
+Swap Used: 2.00 GB (12.5%)
+
+=== LOAD AVERAGE ===
+1 min: 2.45 (raw)
+5 min: 1.80 (raw)
+15 min: 1.20 (raw)
+Capacity (1 min): 24.5%
+Capacity (5 min): 18.0%
+Capacity (15 min): 12.0%
+
+=== CURRENT PROCESS (PID: 12345) ===
+Parent PID: 1234
+CPU User: 450 ticks
+CPU System: 123 ticks
+Memory RSS: 45.32 MB
+Memory VMS: 128.50 MB
+Threads: 8
 ```
 
 ## What You Can Do
