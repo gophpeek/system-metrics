@@ -4,7 +4,18 @@
 [![Tests](https://img.shields.io/github/actions/workflow/status/gophpeek/system-metrics/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/gophpeek/system-metrics/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/gophpeek/system-metrics.svg?style=flat-square)](https://packagist.org/packages/gophpeek/system-metrics)
 
-A modern PHP library for accessing low-level system metrics on Linux and macOS. Get raw CPU counters, memory statistics, environment detection, container information, and more with a clean, type-safe API powered by PHP 8.3's readonly classes.
+**Get real-time system metrics from Linux and macOS in pure PHP.** No extensions, no dependencies, just clean type-safe access to CPU, memory, and environment data.
+
+```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
+$result = SystemMetrics::overview();
+$overview = $result->getValue();
+
+echo "OS: {$overview->environment->os->name}\n";
+echo "CPU Cores: {$overview->cpu->coreCount()}\n";
+echo "Memory: " . round($overview->memory->usedPercentage(), 1) . "%\n";
+```
 
 ## Support us
 
@@ -14,230 +25,423 @@ We invest a lot of resources into creating [best in class open source packages](
 
 We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
 
-## Installation
+## Quick Start
 
-You can install the package via composer:
+### Installation
 
 ```bash
 composer require gophpeek/system-metrics
 ```
 
-## Features
+### Requirements
 
-- **Environment Detection**: OS family, version, kernel info, CPU architecture, virtualization, containerization, cgroup support
-- **CPU Metrics**: Raw time counters (user, system, idle, iowait, etc.) for total system and per-core
-- **Memory Metrics**: Total, free, available, used, buffers, cached memory plus swap information in bytes
-- **Result Pattern**: Explicit success/failure handling with type-safe Result<T> objects
-- **Cross-Platform**: Native support for Linux and macOS
-- **Type-Safe**: Leverages PHP 8.3 readonly classes and strict types throughout
-- **Immutable DTOs**: All data transfer objects are immutable value objects
-- **Interface-Driven**: Easily swap implementations or add custom sources
+- **PHP 8.3+** (uses modern readonly classes)
+- **Linux or macOS** (Windows not supported)
+- **Read permissions** for `/proc`, `/sys` (Linux) or `sysctl`, `vm_stat` commands (macOS)
 
-## Requirements
-
-- PHP 8.3 or higher
-- Linux or macOS operating system
-
-## Design Principles
-
-PHPeek System Metrics is built on a foundation of modern PHP best practices:
-
-1. **Pure PHP**: No external dependencies or system extensions required - works out of the box
-2. **Strict Types**: All code uses `declare(strict_types=1)` for maximum type safety
-3. **Immutable DTOs**: All data transfer objects are readonly value objects that can't be modified
-4. **Action Pattern**: Small, focused actions with well-defined input/output - easy to test and maintain
-5. **Interface-Driven**: All core components are behind interfaces - easily swap implementations
-6. **Result Pattern**: Explicit success/failure handling with `Result<T>` - no uncaught exceptions
-7. **Layered Sources**: Composite pattern with fallback logic - graceful degradation when APIs unavailable
-
-## Architecture
-
-### Result<T> Pattern
-
-Instead of throwing exceptions, all operations return a `Result<T>` object that explicitly represents success or failure:
-
-```php
-$result = SystemMetrics::cpu();
-
-if ($result->isSuccess()) {
-    $cpu = $result->getValue();
-    // Work with CPU metrics
-} else {
-    $error = $result->getError();
-    // Handle error gracefully
-}
-```
-
-This approach provides:
-- **Compile-time safety**: Forces you to handle errors explicitly
-- **No uncaught exceptions**: Errors are values, not control flow
-- **Functional style**: Use `map()`, `onSuccess()`, `onFailure()` for elegant error handling
-
-### Composite Sources with Fallbacks
-
-Each metric type uses a composite source that tries multiple implementations in order:
-
-```
-CompositeCpuMetricsSource
-├── LinuxProcCpuMetricsSource (if on Linux)
-├── MacOsSysctlCpuMetricsSource (if on macOS)
-└── MinimalCpuMetricsSource (fallback with zeros)
-```
-
-This enables graceful degradation. For example, modern macOS systems lack the `kern.cp_time` sysctl, so the library returns valid data structures with zero values rather than failing.
-
-### Swappable Implementations
-
-All metric sources are configurable via `SystemMetricsConfig`:
-
-```php
-use PHPeek\SystemMetrics\Config\SystemMetricsConfig;
-
-// Use your custom CPU source
-SystemMetricsConfig::setCpuMetricsSource(new MyCustomCpuSource());
-
-// All subsequent calls use your implementation
-$cpu = SystemMetrics::cpu();
-```
-
-This makes it easy to:
-- Integrate with native PHP extensions for better performance
-- Add eBPF-based metrics on Linux
-- Create test doubles for unit testing
-- Implement platform-specific optimizations
-
-## Usage
-
-### Quick Start
+### 30-Second Example
 
 ```php
 use PHPeek\SystemMetrics\SystemMetrics;
 
-// Get complete system overview
+// Get everything at once
 $result = SystemMetrics::overview();
 
 if ($result->isSuccess()) {
     $overview = $result->getValue();
 
-    // Environment info
-    echo "OS: {$overview->environment->os->name} {$overview->environment->os->version}\n";
-    echo "Architecture: {$overview->environment->architecture->kind->value}\n";
+    // Environment
+    echo $overview->environment->os->name;        // "Ubuntu"
+    echo $overview->environment->architecture->kind->value; // "x86_64"
 
-    // CPU metrics
-    echo "CPU Cores: {$overview->cpu->coreCount()}\n";
-    echo "Total User Time: {$overview->cpu->total->user} ticks\n";
+    // CPU (raw time counters in ticks)
+    echo $overview->cpu->coreCount();             // 8
+    echo $overview->cpu->total->user;             // 123456 ticks
 
-    // Memory metrics
-    $memoryUsedGB = $overview->memory->usedBytes / 1024 / 1024 / 1024;
-    echo "Memory Used: " . round($memoryUsedGB, 2) . " GB\n";
-    echo "Memory Usage: " . round($overview->memory->usedPercentage(), 1) . "%\n";
+    // Memory (all values in bytes)
+    $usedGB = $overview->memory->usedBytes / 1024**3;
+    echo round($usedGB, 2) . " GB";               // "8.42 GB"
+    echo $overview->memory->usedPercentage();     // 52.3
 }
 ```
 
-### Individual Metrics
+## What You Can Do
+
+### ✅ Environment Detection
+
+Detect OS, architecture, virtualization, containers, and cgroups:
 
 ```php
-use PHPeek\SystemMetrics\SystemMetrics;
+$env = SystemMetrics::environment()->getValue();
 
-// Environment detection
-$envResult = SystemMetrics::environment();
-if ($envResult->isSuccess()) {
-    $env = $envResult->getValue();
+// OS Info
+$env->os->family->value;      // OsFamily::Linux
+$env->os->name;               // "Ubuntu"
+$env->os->version;            // "22.04"
 
-    echo "OS Family: {$env->os->family->value}\n";
-    echo "Kernel: {$env->kernel->release}\n";
-    echo "Virtualization: {$env->virtualization->type->value}\n";
+// Architecture
+$env->architecture->kind->value;    // "x86_64" or "arm64"
+$env->architecture->rosettaTranslation; // true on M1 Macs running x86_64
 
-    if ($env->containerization->insideContainer) {
-        echo "Running in: {$env->containerization->type->value}\n";
-    }
+// Virtualization
+$env->virtualization->type->value;  // "kvm", "vmware", "none"
+$env->virtualization->isVirtual;    // true/false
 
-    echo "Cgroup Version: {$env->cgroup->version->value}\n";
-}
+// Container Detection
+$env->containerization->insideContainer; // true/false
+$env->containerization->type->value;     // "docker", "kubernetes", "none"
 
-// CPU metrics
-$cpuResult = SystemMetrics::cpu();
-if ($cpuResult->isSuccess()) {
-    $cpu = $cpuResult->getValue();
+// Cgroups
+$env->cgroup->version->value;  // "v1", "v2", "none"
+$env->cgroup->detected;        // true/false
+```
 
-    echo "Total CPU Time: {$cpu->total->total()} ticks\n";
-    echo "Busy Time: {$cpu->total->busy()} ticks\n";
+### ✅ CPU Metrics
 
-    // Per-core metrics
-    foreach ($cpu->perCore as $core) {
-        echo "Core {$core->coreIndex}: {$core->times->user} user ticks\n";
-    }
-}
+Get raw CPU time counters (in ticks):
 
-// Memory metrics
-$memResult = SystemMetrics::memory();
-if ($memResult->isSuccess()) {
-    $mem = $memResult->getValue();
+```php
+$cpu = SystemMetrics::cpu()->getValue();
 
-    $totalGB = $mem->totalBytes / 1024 / 1024 / 1024;
-    $availableGB = $mem->availableBytes / 1024 / 1024 / 1024;
+// Total CPU time across all cores
+$cpu->total->user;      // Time in user mode
+$cpu->total->system;    // Time in kernel mode
+$cpu->total->idle;      // Idle time
+$cpu->total->iowait;    // Waiting for I/O (Linux only)
+$cpu->total->total();   // Sum of all time
+$cpu->total->busy();    // Total - idle
 
-    echo "Total Memory: " . round($totalGB, 2) . " GB\n";
-    echo "Available: " . round($availableGB, 2) . " GB\n";
-    echo "Usage: " . round($mem->usedPercentage(), 1) . "%\n";
-
-    if ($mem->swapTotalBytes > 0) {
-        echo "Swap Usage: " . round($mem->swapUsedPercentage(), 1) . "%\n";
-    }
+// Per-core metrics
+$cpu->coreCount();      // Number of CPU cores
+foreach ($cpu->perCore as $core) {
+    echo "Core {$core->coreIndex}: {$core->times->user} ticks\n";
 }
 ```
 
-### Error Handling
+**Note:** These are raw counters that increase monotonically. To calculate CPU usage %, you need to take two snapshots and calculate the delta.
+
+### ✅ Memory Metrics
+
+Get memory usage (all values in bytes):
 
 ```php
-use PHPeek\SystemMetrics\SystemMetrics;
+$mem = SystemMetrics::memory()->getValue();
 
+// Physical Memory
+$mem->totalBytes;           // Total physical RAM
+$mem->freeBytes;            // Completely unused memory
+$mem->availableBytes;       // Free + reclaimable (best indicator)
+$mem->usedBytes;            // Actually in use
+$mem->buffersBytes;         // Buffer cache (Linux)
+$mem->cachedBytes;          // Page cache (Linux)
+
+// Calculated Percentages
+$mem->usedPercentage();     // Used / total * 100
+$mem->availablePercentage(); // Available / total * 100
+
+// Swap Memory
+$mem->swapTotalBytes;       // Total swap space
+$mem->swapFreeBytes;        // Free swap
+$mem->swapUsedBytes;        // Used swap
+$mem->swapUsedPercentage(); // Swap usage %
+```
+
+## What You Cannot Do
+
+### ❌ Windows Support
+
+Windows is **not supported**. Attempting to use this library on Windows will return error results:
+
+```php
 $result = SystemMetrics::cpu();
-
-// Pattern 1: Check and handle
 if ($result->isFailure()) {
-    $error = $result->getError();
-    echo "Error: {$error->getMessage()}\n";
-    exit(1);
+    // On Windows: "Unsupported operating system: Windows"
 }
-$cpu = $result->getValue();
+```
 
-// Pattern 2: Use default value
+### ❌ CPU Usage Percentage (Direct)
+
+This library provides **raw counters only**, not calculated percentages. You need to:
+
+1. Take a snapshot
+2. Wait (e.g., 1 second)
+3. Take another snapshot
+4. Calculate delta: `(busy2 - busy1) / (total2 - total1) * 100`
+
+```php
+// ❌ Wrong - no instant percentage
+$cpu = SystemMetrics::cpu()->getValue();
+// There's no $cpu->usagePercentage() method
+
+// ✅ Correct - calculate from two snapshots
+$snap1 = SystemMetrics::cpu()->getValue();
+sleep(1);
+$snap2 = SystemMetrics::cpu()->getValue();
+
+$deltaTotal = $snap2->total->total() - $snap1->total->total();
+$deltaBusy = $snap2->total->busy() - $snap1->total->busy();
+$cpuUsage = ($deltaBusy / $deltaTotal) * 100;
+```
+
+### ❌ Real-Time Streaming
+
+Each method call reads from the system **at that moment**. There's no built-in streaming or continuous monitoring.
+
+### ❌ Historical Data
+
+The library only returns **current values**. No history, trends, or time series data.
+
+### ❌ Process-Level Metrics
+
+Only **system-wide metrics** are available. No per-process CPU or memory usage (use `proc_open()` with `ps` or `/proc/{pid}/` for that).
+
+## Permission Requirements
+
+### Linux
+
+The library reads from `/proc` and `/sys` filesystems:
+
+```bash
+# Required read access (usually world-readable)
+/proc/meminfo           # Memory metrics
+/proc/stat              # CPU metrics
+/proc/cpuinfo          # CPU architecture
+/proc/self/cgroup      # Container detection
+/sys/hypervisor/type   # Virtualization detection
+/etc/os-release        # OS information
+```
+
+**Permissions:** Usually **no special permissions** needed. Standard user access works.
+
+**Containers:** Inside Docker/Kubernetes, `/proc` is typically mounted, but some metrics may be restricted or show container-specific values.
+
+### macOS
+
+The library executes these commands:
+
+```bash
+sysctl -n kern.cp_time      # CPU metrics (may fail on Apple Silicon)
+sysctl -n kern.cp_times     # Per-core CPU (may fail on Apple Silicon)
+sysctl -n hw.memsize        # Total RAM
+sysctl -n hw.ncpu           # CPU count
+vm_stat                     # Memory statistics
+sw_vers -productVersion     # OS version
+```
+
+**Permissions:** Usually **no special permissions** needed. Standard user access works.
+
+**Restrictions:** On modern macOS (especially Apple Silicon), CPU time sysctls may be unavailable. The library gracefully returns zero values instead of failing.
+
+## Known Limitations
+
+### macOS CPU Metrics (Apple Silicon)
+
+Modern macOS versions (especially Apple Silicon) have **deprecated** `kern.cp_time` and `kern.cp_times` sysctls:
+
+```php
+$cpu = SystemMetrics::cpu()->getValue();
+// On Apple Silicon: $cpu->total->user may be 0
+// The library won't fail, but CPU counters will be zero
+```
+
+**Workaround:** Use `top`, `ps`, or Activity Monitor for CPU usage on modern Macs. This library focuses on Linux production environments.
+
+### Container Environments
+
+Inside containers (Docker, Kubernetes):
+
+- **CPU metrics** reflect the container's assigned CPUs, not host
+- **Memory metrics** reflect container limits, not host RAM
+- **Environment detection** correctly identifies the container type
+- Some `/proc` paths may be read-only or restricted
+
+### macOS Swap
+
+macOS uses **dynamic swap**, creating/removing swap files on-demand. Swap metrics are best-effort estimates.
+
+### File Permissions
+
+If your user lacks permission to read `/proc` or execute `sysctl`:
+
+```php
+$result = SystemMetrics::cpu();
+// Result will be failure with InsufficientPermissionsException
+```
+
+No special capabilities or root access is required in standard environments.
+
+## Error Handling (Result Pattern)
+
+**All methods return `Result<T>`**, not raw values. This forces explicit error handling:
+
+```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
+// ✅ Check before using
+$result = SystemMetrics::cpu();
+if ($result->isSuccess()) {
+    $cpu = $result->getValue();
+    // Use $cpu safely
+} else {
+    $error = $result->getError();
+    echo "Failed: {$error->getMessage()}\n";
+}
+
+// ✅ Provide default value
 $cpu = SystemMetrics::cpu()->getValueOr(null);
 if ($cpu === null) {
     echo "Could not read CPU metrics\n";
 }
 
-// Pattern 3: Callbacks
+// ✅ Functional style with callbacks
 SystemMetrics::memory()
-    ->onSuccess(fn($mem) => echo "Memory: {$mem->totalBytes} bytes\n")
-    ->onFailure(fn($err) => echo "Error: {$err->getMessage()}\n");
+    ->onSuccess(fn($mem) => $this->storageMetrics($mem))
+    ->onFailure(fn($err) => $this->logError($err));
+
+// ❌ Wrong - will throw if result is failure
+$cpu = SystemMetrics::cpu()->getValue(); // Can throw!
 ```
 
+### Possible Errors
+
+- **`FileNotFoundException`** - `/proc/stat` or similar file doesn't exist
+- **`InsufficientPermissionsException`** - Can't read file or execute command
+- **`ParseException`** - File format is unexpected/corrupted
+- **`UnsupportedOperatingSystemException`** - Not Linux or macOS
+- **`SystemMetricsException`** - Generic error (command failed, etc.)
+
+## Advanced Usage
+
 ### Custom Implementations
+
+Swap out any metric source with your own implementation:
 
 ```php
 use PHPeek\SystemMetrics\Config\SystemMetricsConfig;
 use PHPeek\SystemMetrics\Contracts\CpuMetricsSource;
+use PHPeek\SystemMetrics\DTO\Result;
 
-// Create your custom CPU metrics source
-class MyCustomCpuSource implements CpuMetricsSource {
+class RedisCachedCpuSource implements CpuMetricsSource {
     public function read(): Result {
-        // Your custom implementation
+        // Read from Redis cache, fallback to /proc
     }
 }
 
-// Configure globally
-SystemMetricsConfig::setCpuMetricsSource(new MyCustomCpuSource());
+// Set globally
+SystemMetricsConfig::setCpuMetricsSource(new RedisCachedCpuSource());
 
-// Now all calls use your custom source
+// All subsequent calls use your implementation
 $cpu = SystemMetrics::cpu();
 ```
+
+### Dependency Injection
+
+Actions are independent and can be dependency-injected:
+
+```php
+use PHPeek\SystemMetrics\Actions\ReadCpuMetricsAction;
+use PHPeek\SystemMetrics\Sources\Cpu\LinuxProcCpuMetricsSource;
+
+$action = new ReadCpuMetricsAction(
+    new LinuxProcCpuMetricsSource()
+);
+
+$result = $action->execute();
+```
+
+### Testing with Stubs
+
+All contracts have interfaces for easy mocking:
+
+```php
+use PHPeek\SystemMetrics\Contracts\CpuMetricsSource;
+use PHPeek\SystemMetrics\DTO\Result;
+
+$stub = new class implements CpuMetricsSource {
+    public function read(): Result {
+        return Result::success($this->fakeSnapshot());
+    }
+
+    private function fakeSnapshot() { /* ... */ }
+};
+
+SystemMetricsConfig::setCpuMetricsSource($stub);
+```
+
+## Architecture Overview
+
+### Result<T> Pattern
+
+Instead of exceptions, all operations return `Result<T>`:
+
+- **`isSuccess() / isFailure()`** - Check status
+- **`getValue()`** - Get value (throws if failure)
+- **`getValueOr($default)`** - Get value or default
+- **`getError()`** - Get error (null if success)
+- **`map(callable)`** - Transform success value
+- **`onSuccess(callable)`** - Execute on success
+- **`onFailure(callable)`** - Execute on failure
+
+### Composite Pattern with Fallbacks
+
+Each metric uses a composite source that tries multiple implementations:
+
+```
+CompositeCpuMetricsSource
+├── LinuxProcCpuMetricsSource (if Linux)
+├── MacOsSysctlCpuMetricsSource (if macOS)
+└── Returns Result::failure if all fail
+```
+
+This enables graceful degradation when APIs are unavailable.
+
+### Immutable DTOs
+
+All data transfer objects use PHP 8.3 readonly classes:
+
+```php
+readonly class CpuSnapshot {
+    public function __construct(
+        public CpuTimes $total,
+        public array $perCore,
+        public DateTimeImmutable $timestamp,
+    ) {}
+}
+```
+
+Once created, values cannot be modified.
+
+## Design Principles
+
+1. **Pure PHP** - No extensions or system dependencies required
+2. **Strict Types** - `declare(strict_types=1)` everywhere
+3. **Immutable DTOs** - Readonly classes prevent mutations
+4. **Result Pattern** - No uncaught exceptions, explicit error handling
+5. **Interface-Driven** - Easy to swap implementations
+6. **Action Pattern** - Small, focused, testable use cases
+
+## Quality Standards
+
+- **PHPStan Level 9** - Strictest static analysis
+- **89.9% Test Coverage** - Comprehensive test suite
+- **PSR-12** - Laravel Pint code style
+- **PHP 8.3+** - Modern language features
+- **Zero Dependencies** - No external packages
 
 ## Testing
 
 ```bash
+# Run tests
 composer test
+
+# With coverage
+composer test-coverage
+
+# Static analysis
+composer analyse
+
+# Code style
+composer format
 ```
 
 ## Changelog
@@ -246,11 +450,11 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Contributing
 
-Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## Security Vulnerabilities
 
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+Please review [our security policy](.github/SECURITY.md) on how to report security vulnerabilities.
 
 ## Credits
 
