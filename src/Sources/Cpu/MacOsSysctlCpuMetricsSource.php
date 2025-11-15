@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PHPeek\SystemMetrics\Sources\Cpu;
 
 use PHPeek\SystemMetrics\Contracts\CpuMetricsSource;
+use PHPeek\SystemMetrics\Contracts\ProcessRunnerInterface;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuCoreTimes;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuSnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuTimes;
@@ -18,7 +19,7 @@ use PHPeek\SystemMetrics\Support\ProcessRunner;
 final class MacOsSysctlCpuMetricsSource implements CpuMetricsSource
 {
     public function __construct(
-        private readonly ProcessRunner $processRunner = new ProcessRunner,
+        private readonly ProcessRunnerInterface $processRunner = new ProcessRunner,
         private readonly MacOsSysctlParser $parser = new MacOsSysctlParser,
     ) {}
 

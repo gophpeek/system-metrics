@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PHPeek\SystemMetrics\Support;
 
+use PHPeek\SystemMetrics\Contracts\ProcessRunnerInterface;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Exceptions\InsufficientPermissionsException;
 use PHPeek\SystemMetrics\Exceptions\SystemMetricsException;
@@ -11,7 +12,7 @@ use PHPeek\SystemMetrics\Exceptions\SystemMetricsException;
 /**
  * Executes system commands with proper error handling.
  */
-final class ProcessRunner
+final class ProcessRunner implements ProcessRunnerInterface
 {
     /**
      * Execute a command and return its output.

@@ -6,6 +6,7 @@ namespace PHPeek\SystemMetrics\Sources\Process;
 
 use DateTimeImmutable;
 use PHPeek\SystemMetrics\Contracts\ProcessMetricsSource;
+use PHPeek\SystemMetrics\Contracts\ProcessRunnerInterface;
 use PHPeek\SystemMetrics\DTO\Metrics\Process\ProcessGroupSnapshot;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Support\Parser\MacOsPsParser;
@@ -17,7 +18,7 @@ use PHPeek\SystemMetrics\Support\ProcessRunner;
 final class MacOsPsProcessMetricsSource implements ProcessMetricsSource
 {
     public function __construct(
-        private readonly ProcessRunner $processRunner = new ProcessRunner,
+        private readonly ProcessRunnerInterface $processRunner = new ProcessRunner,
         private readonly MacOsPsParser $parser = new MacOsPsParser,
     ) {}
 

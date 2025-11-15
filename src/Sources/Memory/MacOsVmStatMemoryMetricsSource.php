@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PHPeek\SystemMetrics\Sources\Memory;
 
 use PHPeek\SystemMetrics\Contracts\MemoryMetricsSource;
+use PHPeek\SystemMetrics\Contracts\ProcessRunnerInterface;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Support\Parser\MacOsVmStatParser;
 use PHPeek\SystemMetrics\Support\ProcessRunner;
@@ -15,7 +16,7 @@ use PHPeek\SystemMetrics\Support\ProcessRunner;
 final class MacOsVmStatMemoryMetricsSource implements MemoryMetricsSource
 {
     public function __construct(
-        private readonly ProcessRunner $processRunner = new ProcessRunner,
+        private readonly ProcessRunnerInterface $processRunner = new ProcessRunner,
         private readonly MacOsVmStatParser $parser = new MacOsVmStatParser,
     ) {}
 

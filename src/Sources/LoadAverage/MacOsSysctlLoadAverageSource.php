@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PHPeek\SystemMetrics\Sources\LoadAverage;
 
 use PHPeek\SystemMetrics\Contracts\LoadAverageSource;
+use PHPeek\SystemMetrics\Contracts\ProcessRunnerInterface;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Support\Parser\MacOsSysctlLoadavgParser;
 use PHPeek\SystemMetrics\Support\ProcessRunner;
@@ -15,8 +16,8 @@ use PHPeek\SystemMetrics\Support\ProcessRunner;
 final readonly class MacOsSysctlLoadAverageSource implements LoadAverageSource
 {
     public function __construct(
-        private ProcessRunner $processRunner = new ProcessRunner,
-        private MacOsSysctlLoadavgParser $parser = new MacOsSysctlLoadavgParser,
+        private readonly ProcessRunnerInterface $processRunner = new ProcessRunner,
+        private readonly MacOsSysctlLoadavgParser $parser = new MacOsSysctlLoadavgParser,
     ) {}
 
     /**
