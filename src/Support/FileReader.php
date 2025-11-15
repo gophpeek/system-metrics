@@ -41,15 +41,15 @@ final class FileReader implements FileReaderInterface
     /**
      * Read a file and return it as an array of lines.
      *
-     * @return Result<array<string>>
+     * @return Result<list<string>>
      */
     public function readLines(string $path): Result
     {
         return $this->read($path)->map(function (string $contents): array {
-            return array_filter(
+            return array_values(array_filter(
                 explode("\n", $contents),
                 fn (string $line) => $line !== ''
-            );
+            ));
         });
     }
 

@@ -51,7 +51,7 @@ final class MacOsSysctlParser
      * Parse kern.cp_times output (per-core CPU).
      * Format: "{ core0_user, core0_nice, core0_sys, core0_idle, core1_user, ... }"
      *
-     * @return Result<array<CpuCoreTimes>>
+     * @return Result<list<CpuCoreTimes>>
      */
     public function parseCpTimes(string $content): Result
     {

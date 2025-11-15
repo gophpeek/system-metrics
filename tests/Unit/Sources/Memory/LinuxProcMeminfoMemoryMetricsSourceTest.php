@@ -17,6 +17,11 @@ class FakeMemoryFileReader implements FileReaderInterface
     {
         return Result::success($this->returnContent);
     }
+
+    public function exists(string $path): bool
+    {
+        return true;
+    }
 }
 
 class FakeMemoryFileReaderNotFound implements FileReaderInterface
@@ -24,6 +29,11 @@ class FakeMemoryFileReaderNotFound implements FileReaderInterface
     public function read(string $path): Result
     {
         return Result::failure(new FileNotFoundException($path));
+    }
+
+    public function exists(string $path): bool
+    {
+        return false;
     }
 }
 

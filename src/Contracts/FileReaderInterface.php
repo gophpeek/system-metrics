@@ -17,4 +17,9 @@ interface FileReaderInterface
      * @return Result<string>
      */
     public function read(string $path): Result;
+
+    /**
+     * Check if a file exists and is readable.
+     */
+    public function exists(string $path): bool;
 }

@@ -47,15 +47,15 @@ final class ProcessRunner
     /**
      * Execute a command and return its output as an array of lines.
      *
-     * @return Result<array<string>>
+     * @return Result<list<string>>
      */
     public function executeLines(string $command): Result
     {
         return $this->execute($command)->map(function (string $output): array {
-            return array_filter(
+            return array_values(array_filter(
                 explode("\n", $output),
                 fn (string $line) => $line !== ''
-            );
+            ));
         });
     }
 

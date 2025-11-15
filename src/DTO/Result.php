@@ -9,7 +9,7 @@ use PHPeek\SystemMetrics\Exceptions\SystemMetricsException;
 /**
  * Represents the result of an operation that may succeed or fail.
  *
- * @template T
+ * @template-covariant T
  */
 final readonly class Result
 {
@@ -40,7 +40,10 @@ final readonly class Result
      *
      * @template U
      *
+     * @param  SystemMetricsException  $error
      * @return Result<U>
+     *
+     * @phpstan-ignore method.templateTypeNotInParameter
      */
     public static function failure(SystemMetricsException $error): self
     {
@@ -83,8 +86,10 @@ final readonly class Result
     /**
      * Get the value if successful, otherwise return the default value.
      *
-     * @param  T  $default
-     * @return T
+     * @template U
+     *
+     * @param  U  $default
+     * @return T|U
      */
     public function getValueOr(mixed $default): mixed
     {
