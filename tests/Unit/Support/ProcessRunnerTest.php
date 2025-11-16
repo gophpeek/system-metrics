@@ -190,7 +190,7 @@ describe('ProcessRunner', function () {
 
         foreach ($dangerousCommands as $cmd) {
             $result = $runner->execute($cmd);
-            expect($result->isFailure())->toBeTrue('Command should be rejected: ' . $cmd);
+            expect($result->isFailure())->toBeTrue('Command should be rejected: '.$cmd);
         }
     });
 });

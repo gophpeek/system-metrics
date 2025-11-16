@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use PHPeek\SystemMetrics\Tests\E2E\Support\DockerHelper;
-use PHPeek\SystemMetrics\Tests\E2E\Support\MetricsValidator;
 
 describe('Docker CgroupV1 - Memory Limits', function () {
 
@@ -97,7 +96,7 @@ PHP;
         $data = json_decode($output, true);
 
         expect($data['consistent'])->toBeTrue(
-            'Memory metrics should be internally consistent: ' . implode(', ', $data['errors'] ?? [])
+            'Memory metrics should be internally consistent: '.implode(', ', $data['errors'] ?? [])
         );
     });
 
@@ -136,6 +135,7 @@ PHP;
         // Skip if not actually cgroup v1 (macOS Docker Desktop uses v2)
         if (! DockerHelper::fileExists('cgroupv1-target', '/sys/fs/cgroup/memory/memory.limit_in_bytes')) {
             expect(true)->toBeTrue('Skipping: Host uses cgroup v2, not v1');
+
             return;
         }
 
@@ -167,6 +167,7 @@ PHP;
         // Skip if not actually cgroup v1 (macOS Docker Desktop uses v2)
         if (! DockerHelper::fileExists('cgroupv1-target', '/sys/fs/cgroup/memory/memory.usage_in_bytes')) {
             expect(true)->toBeTrue('Skipping: Host uses cgroup v2, not v1');
+
             return;
         }
 

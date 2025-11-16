@@ -10,6 +10,7 @@ describe('Docker CgroupV1 - CPU Throttling', function () {
         // Skip if not actually cgroup v1 (macOS Docker Desktop uses v2)
         if (! DockerHelper::fileExists('cgroupv1-target', '/sys/fs/cgroup/cpu/cpu.stat')) {
             expect(true)->toBeTrue('Skipping: Host uses cgroup v2, not v1');
+
             return;
         }
 
@@ -84,6 +85,7 @@ describe('Docker CgroupV1 - CPU Throttling', function () {
         // Skip if not actually cgroup v1 (macOS Docker Desktop uses v2)
         if (! DockerHelper::fileExists('cgroupv1-target', '/sys/fs/cgroup/cpu/cpu.stat')) {
             expect(true)->toBeTrue('Skipping: Host uses cgroup v2, not v1');
+
             return;
         }
 

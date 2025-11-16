@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-use PHPeek\SystemMetrics\SystemMetrics;
 use PHPeek\SystemMetrics\Tests\E2E\Support\DockerHelper;
-use PHPeek\SystemMetrics\Tests\E2E\Support\MetricsValidator;
 
 describe('Docker CgroupV1 - CPU Limits', function () {
 
@@ -136,6 +134,7 @@ PHP;
         // Skip if not actually cgroup v1 (macOS Docker Desktop uses v2)
         if (! DockerHelper::fileExists('cgroupv1-target', '/sys/fs/cgroup/cpu/cpu.cfs_quota_us')) {
             expect(true)->toBeTrue('Skipping: Host uses cgroup v2, not v1');
+
             return;
         }
 

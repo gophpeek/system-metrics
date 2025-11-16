@@ -22,7 +22,7 @@ class DockerHelper
         $returnCode = 0;
 
         // Use docker compose exec to resolve service names
-        $composeFile = __DIR__ . '/../../../e2e/compose/docker-compose.yml';
+        $composeFile = __DIR__.'/../../../e2e/compose/docker-compose.yml';
 
         exec(
             sprintf(
@@ -37,7 +37,7 @@ class DockerHelper
 
         if ($returnCode !== 0) {
             throw new RuntimeException(
-                "Docker exec failed in {$container}: " . implode("\n", $output)
+                "Docker exec failed in {$container}: ".implode("\n", $output)
             );
         }
 
@@ -63,7 +63,7 @@ class DockerHelper
      */
     public static function getContainerId(string $serviceName): string
     {
-        $composeFile = __DIR__ . '/../../../e2e/compose/docker-compose.yml';
+        $composeFile = __DIR__.'/../../../e2e/compose/docker-compose.yml';
         $output = [];
         exec(
             sprintf(
@@ -166,7 +166,7 @@ class DockerHelper
         string $testPath,
         array $groups = []
     ): string {
-        $groupArgs = empty($groups) ? '' : '--group=' . implode(',', $groups);
+        $groupArgs = empty($groups) ? '' : '--group='.implode(',', $groups);
 
         $command = sprintf(
             'cd /workspace && vendor/bin/pest %s %s',
@@ -182,7 +182,7 @@ class DockerHelper
      */
     public static function isRunning(string $container): bool
     {
-        $composeFile = __DIR__ . '/../../../e2e/compose/docker-compose.yml';
+        $composeFile = __DIR__.'/../../../e2e/compose/docker-compose.yml';
         $output = [];
         exec(
             sprintf(

@@ -170,7 +170,7 @@ PHP;
         $data = json_decode($output, true);
 
         expect($data['consistent'])->toBeTrue(
-            'Memory metrics should be internally consistent: ' . implode(', ', $data['errors'] ?? [])
+            'Memory metrics should be internally consistent: '.implode(', ', $data['errors'] ?? [])
         );
     });
 

@@ -171,7 +171,6 @@ final class SystemMetrics
      * $delta = $result->getValue();
      * echo "CPU Usage: " . round($delta->usagePercentage(), 1) . "%\n";
      * ```
-     *
      * @example Longer measurement (5 seconds, more accurate)
      * ```php
      * $result = SystemMetrics::cpuUsage(5.0);

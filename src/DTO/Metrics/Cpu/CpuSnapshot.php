@@ -165,7 +165,6 @@ final readonly class CpuSnapshot
      * $delta = CpuSnapshot::calculateDelta($snap1, $snap2);
      * echo "CPU Usage: " . round($delta->usagePercentage(), 1) . "%\n";
      * ```
-     *
      * @example Per-core analysis
      * ```php
      * $snap1 = SystemMetrics::cpu()->getValue();

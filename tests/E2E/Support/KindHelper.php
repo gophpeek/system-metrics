@@ -45,7 +45,7 @@ class KindHelper
      */
     public static function createCluster(): void
     {
-        $configPath = __DIR__ . '/../../../e2e/kind/cluster-config.yaml';
+        $configPath = __DIR__.'/../../../e2e/kind/cluster-config.yaml';
 
         if (! file_exists($configPath)) {
             throw new RuntimeException("Kind config not found: {$configPath}");
@@ -61,7 +61,7 @@ class KindHelper
 
         if ($returnCode !== 0) {
             throw new RuntimeException(
-                'Failed to create Kind cluster: ' . implode("\n", $output)
+                'Failed to create Kind cluster: '.implode("\n", $output)
             );
         }
 
@@ -85,7 +85,7 @@ class KindHelper
 
         if ($returnCode !== 0) {
             throw new RuntimeException(
-                'Nodes did not become ready: ' . implode("\n", $output)
+                'Nodes did not become ready: '.implode("\n", $output)
             );
         }
     }
@@ -95,7 +95,7 @@ class KindHelper
      */
     public static function deployTestPods(): void
     {
-        $manifestsDir = __DIR__ . '/../../../e2e/kind';
+        $manifestsDir = __DIR__.'/../../../e2e/kind';
 
         // Create namespace
         self::kubectl('create namespace metrics-test --dry-run=client -o yaml | kubectl apply -f -');
@@ -134,7 +134,7 @@ class KindHelper
 
         if ($returnCode !== 0) {
             throw new RuntimeException(
-                "Failed to load image {$image}: " . implode("\n", $output)
+                "Failed to load image {$image}: ".implode("\n", $output)
             );
         }
     }
@@ -158,7 +158,7 @@ class KindHelper
 
         if ($returnCode !== 0) {
             throw new RuntimeException(
-                "Pod {$podName} did not become ready: " . implode("\n", $output)
+                "Pod {$podName} did not become ready: ".implode("\n", $output)
             );
         }
     }
@@ -185,7 +185,7 @@ class KindHelper
 
         if ($returnCode !== 0) {
             throw new RuntimeException(
-                "kubectl exec failed in {$podName}: " . implode("\n", $output)
+                "kubectl exec failed in {$podName}: ".implode("\n", $output)
             );
         }
 
@@ -250,7 +250,7 @@ class KindHelper
 
         if ($returnCode !== 0) {
             throw new RuntimeException(
-                'kubectl failed: ' . implode("\n", $output)
+                'kubectl failed: '.implode("\n", $output)
             );
         }
 

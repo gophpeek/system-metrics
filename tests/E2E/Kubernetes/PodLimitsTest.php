@@ -3,10 +3,8 @@
 declare(strict_types=1);
 
 use PHPeek\SystemMetrics\Tests\E2E\Support\KindHelper;
-use PHPeek\SystemMetrics\Tests\E2E\Support\MetricsValidator;
 
 describe('Kubernetes - Pod Resource Limits', function () {
-
 
     it('detects CPU limits in Kubernetes pod', function () {
         $code = <<<'PHP'
