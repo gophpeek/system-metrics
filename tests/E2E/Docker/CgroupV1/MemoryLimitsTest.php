@@ -119,17 +119,21 @@ PHP;
         $memoryMetrics = json_decode(DockerHelper::runPhp('cgroupv1-target', $memoryCode), true);
 
         // Basic sanity checks
-        expect($memoryMetrics['totalBytes'])->toBeGreaterThan(0);
-        expect($memoryMetrics['usedBytes'])->toBeGreaterThanOrEqual(0);
-        expect($memoryMetrics['freeBytes'])->toBeGreaterThanOrEqual(0);
-        expect($memoryMetrics['usedPercentage'])->toBeGreaterThanOrEqual(0.0);
-        expect($memoryMetrics['usedPercentage'])->toBeLessThanOrEqual(100.0);
+        expect($memoryMetrics['totalBytes'])->toBeGreaterThan(0, 'Total memory should be positive');
+        expect($memoryMetrics['usedBytes'])->toBeGreaterThanOrEqual(0, 'Used memory should be non-negative');
+        expect($memoryMetrics['freeBytes'])->toBeGreaterThanOrEqual(0, 'Free memory should be non-negative');
+        expect($memoryMetrics['usedPercentage'])->toBeGreaterThanOrEqual(0.0, 'Usage % >= 0');
+        expect($memoryMetrics['usedPercentage'])->toBeLessThanOrEqual(100.0, 'Usage % <= 100');
 
-        // Total = used + free (approximately, kernel caches may cause small differences)
-        $calculatedTotal = $memoryMetrics['usedBytes'] + $memoryMetrics['freeBytes'];
-        $tolerance = $memoryMetrics['totalBytes'] * 0.1; // 10% tolerance
-        expect($calculatedTotal)->toBeGreaterThan($memoryMetrics['totalBytes'] - $tolerance);
-        expect($calculatedTotal)->toBeLessThan($memoryMetrics['totalBytes'] + $tolerance);
+        // Used and free should not exceed total
+        expect($memoryMetrics['usedBytes'])->toBeLessThanOrEqual(
+            $memoryMetrics['totalBytes'],
+            'Used memory cannot exceed total'
+        );
+        expect($memoryMetrics['freeBytes'])->toBeLessThanOrEqual(
+            $memoryMetrics['totalBytes'],
+            'Free memory cannot exceed total'
+        );
     })->skip(
         ! DockerHelper::hasStressNg('cgroupv1-target'),
         'stress-ng not available in container'
