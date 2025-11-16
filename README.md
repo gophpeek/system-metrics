@@ -399,6 +399,63 @@ echo "Total Packets: " . $network->totalPacketsReceived() + $network->totalPacke
 - `bluetooth`: Bluetooth interfaces (bt*)
 - `other`: Unknown or virtual interfaces
 
+### ✅ Container Metrics (Cgroups)
+
+Get container resource limits and usage when running in Docker/Kubernetes:
+
+```php
+$container = SystemMetrics::container()->getValue();
+
+// Check if running in container
+if ($container->cgroupVersion !== CgroupVersion::NONE) {
+    echo "Cgroup version: {$container->cgroupVersion->value}\n";
+
+    // CPU limits and usage
+    if ($container->hasCpuLimit()) {
+        echo "CPU quota: {$container->cpuQuota} cores\n";
+        echo "CPU usage: {$container->cpuUsageCores} cores\n";
+        echo "CPU utilization: " . round($container->cpuUtilizationPercentage(), 1) . "%\n";
+        echo "Available CPU: {$container->availableCpuCores()} cores\n";
+    }
+
+    // Memory limits and usage
+    if ($container->hasMemoryLimit()) {
+        $limitGB = round($container->memoryLimitBytes / 1024**3, 2);
+        $usageGB = round($container->memoryUsageBytes / 1024**3, 2);
+        echo "Memory limit: {$limitGB} GB\n";
+        echo "Memory usage: {$usageGB} GB\n";
+        echo "Memory utilization: " . round($container->memoryUtilizationPercentage(), 1) . "%\n";
+    }
+
+    // Health indicators
+    if ($container->isCpuThrottled()) {
+        echo "⚠️  CPU is being throttled (count: {$container->cpuThrottledCount})\n";
+    }
+
+    if ($container->hasOomKills()) {
+        echo "🚨 OOM kills detected: {$container->oomKillCount}\n";
+    }
+}
+```
+
+**Features:**
+- **Cgroup v1 and v2 support**: Works with both legacy and unified cgroup hierarchies
+- **CPU quota tracking**: Detects CPU limits (e.g., Docker `--cpus=2`)
+- **Memory limits**: Detects memory limits (e.g., Docker `-m 4g`)
+- **Usage monitoring**: Track actual CPU and memory usage within container
+- **Throttling detection**: Identify when container is hitting CPU limits
+- **OOM kill tracking**: Detect out-of-memory kills
+- **Helper methods**: Easy percentage calculations and availability checks
+
+**Use Cases:**
+- Auto-scaling decisions based on container limits (not host resources)
+- Preventing OOM kills by monitoring memory utilization
+- Detecting CPU throttling before it impacts performance
+- Resource-aware worker scaling in queues
+- Container health monitoring and alerting
+
+**Note:** Returns `CgroupVersion::NONE` on non-Linux systems or when not running in a container.
+
 ### ✅ Process-Level Monitoring
 
 Monitor resource usage for individual processes or process groups:

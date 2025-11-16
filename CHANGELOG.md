@@ -5,6 +5,41 @@ All notable changes to `system-metrics` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.4.0 - 2025-01-XX
+
+### Added
+- **Container Metrics (Cgroups)**: Full Docker/Kubernetes resource monitoring
+  - `SystemMetrics::container()` facade method for container metrics
+  - `ContainerLimits`: Complete container resource limits and usage
+  - `CgroupVersion` enum: V1, V2, NONE
+  - Cgroup v1 support: CPU quota (`cpu.cfs_quota_us`), memory limits (`memory.limit_in_bytes`)
+  - Cgroup v2 support: CPU quota (`cpu.max`), memory limits (`memory.max`)
+  - CPU usage tracking with delta calculations for accurate utilization
+  - Memory usage tracking (`memory.current`, `memory.usage_in_bytes`)
+  - CPU throttling detection (`nr_throttled` counter)
+  - OOM kill tracking (`oom_kill`, `under_oom` counters)
+  - Helper methods: `hasCpuLimit()`, `hasMemoryLimit()`, `cpuUtilizationPercentage()`, `memoryUtilizationPercentage()`
+  - Helper methods: `availableCpuCores()`, `availableMemoryBytes()`, `isCpuThrottled()`, `hasOomKills()`
+  - `CgroupParser`: Parse cgroup v1 and v2 files from `/sys/fs/cgroup` and `/proc/self/cgroup`
+  - `LinuxCgroupMetricsSource`: Linux cgroup metrics source
+  - `CompositeContainerMetricsSource`: Auto-detection with graceful fallback
+  - `ReadContainerMetricsAction`: Action for container metrics retrieval
+  - `ContainerMetricsSource` contract interface
+- 12 new comprehensive unit tests for container metrics (519 total tests, 1341 assertions)
+
+### Changed
+- Updated README with Container Metrics section including Docker/Kubernetes examples
+- Added cgroup requirements to Linux platform documentation
+
+### Technical Details
+- PHPStan Level 9 compliance maintained (0 errors)
+- Cgroup v1 and v2 auto-detection via `/sys/fs/cgroup/cgroup.controllers`
+- CPU usage calculated using deltas (microseconds for v2, nanoseconds for v1)
+- Unrealistic memory limits (> 8 EiB) treated as "no limit"
+- Graceful handling when cgroups not available (returns CgroupVersion::NONE)
+- Container-aware: reports actual container limits, not host resources
+- Cache for CPU usage deltas to ensure accurate utilization percentages
+
 ## 1.3.0 - 2025-01-XX
 
 ### Added

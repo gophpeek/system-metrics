@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PHPeek\SystemMetrics;
 
 use PHPeek\SystemMetrics\Actions\DetectEnvironmentAction;
+use PHPeek\SystemMetrics\Actions\ReadContainerMetricsAction;
 use PHPeek\SystemMetrics\Actions\ReadCpuMetricsAction;
 use PHPeek\SystemMetrics\Actions\ReadLoadAverageAction;
 use PHPeek\SystemMetrics\Actions\ReadMemoryMetricsAction;
@@ -13,6 +14,7 @@ use PHPeek\SystemMetrics\Actions\ReadStorageMetricsAction;
 use PHPeek\SystemMetrics\Actions\SystemOverviewAction;
 use PHPeek\SystemMetrics\Config\SystemMetricsConfig;
 use PHPeek\SystemMetrics\DTO\Environment\EnvironmentSnapshot;
+use PHPeek\SystemMetrics\DTO\Metrics\Container\ContainerLimits;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuSnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\LoadAverageSnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot;
@@ -100,6 +102,18 @@ final class SystemMetrics
     public static function network(): Result
     {
         $action = new ReadNetworkMetricsAction;
+
+        return $action->execute();
+    }
+
+    /**
+     * Read container resource limits and usage (cgroups).
+     *
+     * @return Result<ContainerLimits>
+     */
+    public static function container(): Result
+    {
+        $action = new ReadContainerMetricsAction;
 
         return $action->execute();
     }
