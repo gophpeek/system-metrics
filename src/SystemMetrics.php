@@ -11,6 +11,7 @@ use PHPeek\SystemMetrics\Actions\ReadLoadAverageAction;
 use PHPeek\SystemMetrics\Actions\ReadMemoryMetricsAction;
 use PHPeek\SystemMetrics\Actions\ReadNetworkMetricsAction;
 use PHPeek\SystemMetrics\Actions\ReadStorageMetricsAction;
+use PHPeek\SystemMetrics\Actions\ReadSystemLimitsAction;
 use PHPeek\SystemMetrics\Actions\ReadUptimeAction;
 use PHPeek\SystemMetrics\Actions\SystemOverviewAction;
 use PHPeek\SystemMetrics\Config\SystemMetricsConfig;
@@ -21,6 +22,7 @@ use PHPeek\SystemMetrics\DTO\Metrics\LoadAverageSnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\Network\NetworkSnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\Storage\StorageSnapshot;
+use PHPeek\SystemMetrics\DTO\Metrics\SystemLimits;
 use PHPeek\SystemMetrics\DTO\Metrics\UptimeSnapshot;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\DTO\SystemOverview;
@@ -92,6 +94,24 @@ final class SystemMetrics
     public static function uptime(): Result
     {
         $action = new ReadUptimeAction;
+
+        return $action->execute();
+    }
+
+    /**
+     * Read unified system resource limits and current usage.
+     *
+     * Returns actual limits based on environment:
+     * - Container: cgroup limits (respects resource constraints)
+     * - Bare metal/VM: host limits (total system resources)
+     *
+     * Critical for vertical scaling decisions to avoid exceeding limits.
+     *
+     * @return Result<SystemLimits>
+     */
+    public static function limits(): Result
+    {
+        $action = new ReadSystemLimitsAction;
 
         return $action->execute();
     }

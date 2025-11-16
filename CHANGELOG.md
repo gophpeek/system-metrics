@@ -19,15 +19,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `ReadUptimeAction` for uptime retrieval
   - 13 comprehensive unit tests for uptime
 
+- **DX Finder Methods**: Developer experience enhancements for targeted metric access
+  - **CpuSnapshot Finders**: Find specific CPU cores with smart filtering
+    - `findCore(int $coreIndex)` - Find specific core by index
+    - `findBusyCores(float $threshold)` - Find cores above busy threshold
+    - `findIdleCores(float $threshold)` - Find cores above idle threshold
+    - `busiestCore()` - Get core with highest busy percentage
+    - `idlestCore()` - Get core with lowest busy percentage
+  - **StorageSnapshot Finders**: Find specific mount points and filesystem types
+    - `findMountPoint(string $path)` - Find mount containing path (most specific match)
+    - `findDevice(string $device)` - Find mount by device name
+    - `findByFilesystemType(FileSystemType $type)` - Find all mounts by filesystem type
+  - **NetworkSnapshot Finders**: Find specific network interfaces with filtering
+    - `findInterface(string $name)` - Find interface by exact name
+    - `findByType(NetworkInterfaceType $type)` - Find interfaces by type
+    - `findActiveInterfaces()` - Find all interfaces that are up
+    - `findByMacAddress(string $mac)` - Find interface by MAC address
+  - 46 comprehensive unit tests for all finder methods
+
+- **Unified Limits API**: Single source for resource limits regardless of environment
+  - `SystemMetrics::limits()` facade method for unified limits and current usage
+  - `SystemLimits` DTO with complete resource limits and current consumption
+  - `LimitSource` enum: HOST (bare metal/VM), CGROUP_V1, CGROUP_V2
+  - **Scaling Decision Helpers**:
+    - `availableCpuCores()` - Calculate available CPU cores for scaling
+    - `availableMemoryBytes()` - Calculate available memory for scaling
+    - `canScaleCpu(int $additionalCores)` - Check if can scale CPU by amount
+    - `canScaleMemory(int $additionalBytes)` - Check if can scale memory by amount
+  - **Utilization Helpers**:
+    - `cpuUtilization()` - CPU usage as percentage (0-100+)
+    - `memoryUtilization()` - Memory usage as percentage (0-100+)
+    - `swapUtilization()` - Swap usage as percentage (null if no swap)
+  - **Headroom Helpers**:
+    - `cpuHeadroom()` - CPU headroom percentage (100 - utilization)
+    - `memoryHeadroom()` - Memory headroom percentage (100 - utilization)
+  - **Pressure Detection**:
+    - `isMemoryPressure(float $threshold = 80.0)` - Detect memory pressure
+    - `isCpuPressure(float $threshold = 80.0)` - Detect CPU pressure
+  - **Environment Detection**:
+    - `isContainerized()` - Check if running in container (cgroup v1/v2)
+  - `CompositeSystemLimitsSource` with intelligent decision logic:
+    - Checks if running in container with cgroup limits first
+    - Uses cgroup limits if available (container-aware)
+    - Falls back to host limits (bare metal/VM)
+    - Integrates with ContainerMetricsSource, CpuMetricsSource, MemoryMetricsSource
+  - `ReadSystemLimitsAction` for limits retrieval
+  - 25 comprehensive unit tests for SystemLimits
+
 ### Changed
 - Updated README with System Uptime section including examples and use cases
+- Updated README with DX Finder Methods section showing targeted metric access
+- Updated README with Unified Limits API section including vertical scaling examples
 
 ### Technical Details
 - PHPStan Level 9 compliance maintained (0 errors)
-- Human-readable format: "5 days, 3 hours, 42 minutes"
+- Human-readable uptime format: "5 days, 3 hours, 42 minutes"
 - Proper singular/plural forms ("1 day" vs "2 days")
-- Immutable readonly DTO
+- Finder methods use smart filtering and sorting for optimal results
+- Most specific mount point matching for nested paths
+- Busy/idle percentage calculations based on CPU time ratios
+- Unified limits provide current usage alongside limits for safe scaling decisions
+- Container-aware: respects cgroup limits, not host resources when containerized
+- Graceful handling of over-provisioned scenarios (usage > limits)
+- Zero headroom when at or over capacity
+- Immutable readonly DTOs throughout
 - Railway-oriented programming with Result<T> pattern
+- 603 total tests, 1486 assertions
 
 ## 1.4.0 - 2025-01-XX
 

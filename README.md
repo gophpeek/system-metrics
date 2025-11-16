@@ -570,6 +570,81 @@ if ($container->cgroupVersion !== CgroupVersion::NONE) {
 
 **Note:** Returns `CgroupVersion::NONE` on non-Linux systems or when not running in a container.
 
+### ✅ Unified Limits API
+
+Get actual resource limits and current usage regardless of environment (bare metal, VM, or container):
+
+```php
+$limits = SystemMetrics::limits()->getValue();
+
+// Check environment
+echo "Source: {$limits->source->value}\n"; // 'host', 'cgroup_v1', or 'cgroup_v2'
+echo "Containerized: " . ($limits->isContainerized() ? 'yes' : 'no') . "\n\n";
+
+// Resource limits and current usage
+echo "=== CPU ===\n";
+echo "Total cores: {$limits->cpuCores}\n";
+echo "Current usage: {$limits->currentCpuCores} cores\n";
+echo "Available: {$limits->availableCpuCores()} cores\n";
+echo "Utilization: " . round($limits->cpuUtilization(), 1) . "%\n";
+echo "Headroom: " . round($limits->cpuHeadroom(), 1) . "%\n\n";
+
+echo "=== Memory ===\n";
+$totalGB = round($limits->memoryBytes / 1024**3, 2);
+$currentGB = round($limits->currentMemoryBytes / 1024**3, 2);
+$availableGB = round($limits->availableMemoryBytes() / 1024**3, 2);
+echo "Total memory: {$totalGB} GB\n";
+echo "Current usage: {$currentGB} GB\n";
+echo "Available: {$availableGB} GB\n";
+echo "Utilization: " . round($limits->memoryUtilization(), 1) . "%\n";
+echo "Headroom: " . round($limits->memoryHeadroom(), 1) . "%\n\n";
+
+// Vertical scaling decisions
+if ($limits->canScaleCpu(2)) {
+    echo "✅ Safe to add 2 more CPU cores\n";
+} else {
+    echo "⚠️  Cannot add 2 more CPU cores (would exceed limit)\n";
+}
+
+if ($limits->canScaleMemory(4 * 1024**3)) { // 4 GB
+    echo "✅ Safe to allocate 4 GB more memory\n";
+} else {
+    echo "⚠️  Cannot allocate 4 GB more memory (would exceed limit)\n";
+}
+
+// Pressure detection
+if ($limits->isMemoryPressure()) {
+    echo "🚨 Memory pressure detected (>80% utilization)\n";
+}
+
+if ($limits->isCpuPressure()) {
+    echo "🚨 CPU pressure detected (>80% utilization)\n";
+}
+```
+
+**Features:**
+- **Environment-aware**: Automatically detects if running on bare metal, VM, or in container
+- **Container-aware limits**: Respects cgroup limits, not host resources when containerized
+- **Scaling helpers**: Check if you can safely scale resources before attempting
+- **Utilization tracking**: Monitor current resource usage as percentage
+- **Headroom calculation**: Know how much capacity remains before hitting limits
+- **Pressure detection**: Alert when approaching resource limits (configurable thresholds)
+- **Over-provisioning support**: Handles scenarios where usage exceeds limits (returns >100%)
+
+**Use Cases:**
+- **Vertical scaling decisions**: Ensure you don't exceed limits when scaling up
+- **Resource planning**: Understand available capacity for new workloads
+- **Auto-scaling logic**: Make informed decisions based on actual limits
+- **Alerting**: Detect resource pressure before hitting hard limits
+- **Multi-environment code**: Same API works on bare metal, VMs, and containers
+
+**Decision Logic:**
+1. Checks if running in container with cgroup limits
+2. If cgroup limits found, uses those (container-aware)
+3. Otherwise falls back to host limits (bare metal/VM)
+
+**Note:** This is the recommended API for vertical scaling decisions as it provides both limits AND current usage, regardless of your environment.
+
 ### ✅ Process-Level Monitoring
 
 Monitor resource usage for individual processes or process groups:
