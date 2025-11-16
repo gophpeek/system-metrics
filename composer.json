@@ -32,7 +32,7 @@
     },
     "require-dev": {
         "laravel/pint": "^1.0",
-        "pestphp/pest": "^4.0",
+        "pestphp/pest": "^4.1",
         "phpstan/phpstan": "^2.0",
         "spatie/ray": "^1.28"
     },
@@ -49,6 +49,8 @@
     "scripts": {
         "test": "vendor/bin/pest",
         "test-coverage": "vendor/bin/pest --coverage",
+        "test:e2e": "vendor/bin/pest tests/E2E/",
+        "test:unit": "vendor/bin/pest tests/Unit/",
         "format": "vendor/bin/pint",
         "format:check": "vendor/bin/pint --test",
         "analyse": "vendor/bin/phpstan analyse"
