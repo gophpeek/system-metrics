@@ -54,16 +54,19 @@ jobs:
         run: vendor/bin/pest --ci --no-coverage tests/Unit/ tests/ExampleTest.php tests/ArchTest.php
 
       - name: Start Docker containers for E2E tests
+        if: runner.os == 'Linux'
         run: docker compose -f e2e/compose/docker-compose.yml up -d
 
       - name: Wait for containers to be ready
+        if: runner.os == 'Linux'
         run: sleep 5
 
       - name: Execute E2E tests (Docker only)
+        if: runner.os == 'Linux'
         run: vendor/bin/pest --ci --no-coverage tests/E2E/Docker/
 
       - name: Stop Docker containers
-        if: always()
+        if: runner.os == 'Linux' && always()
         run: docker compose -f e2e/compose/docker-compose.yml down
 
       - name: Upload test logs on failure
