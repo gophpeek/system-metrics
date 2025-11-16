@@ -187,6 +187,6 @@ Note: This test is skipped in automated runs because it crashes processes.
 TEXT;
 
         expect($instructions)->toBeString('Instructions provided');
-        expect($instructions)->toContain('256m', 'References correct memory limit');
+        expect(str_contains($instructions, '256m'))->toBeTrue('References correct memory limit');
     });
 });

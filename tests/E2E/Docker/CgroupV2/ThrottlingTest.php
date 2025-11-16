@@ -17,9 +17,14 @@ describe('Docker CgroupV2 - CPU Throttling', function () {
         // nr_throttled - number of times throttled
         // throttled_usec - total time throttled in microseconds
 
-        expect($cpuStat)->toContain('nr_periods', 'Should contain nr_periods');
-        expect($cpuStat)->toContain('nr_throttled', 'Should contain nr_throttled');
-        expect($cpuStat)->toContain('throttled_usec', 'Should contain throttled_usec');
+        // Verify the file contains throttling metrics
+        $hasNrPeriods = str_contains($cpuStat, 'nr_periods');
+        $hasNrThrottled = str_contains($cpuStat, 'nr_throttled');
+        $hasThrottledUsec = str_contains($cpuStat, 'throttled_usec');
+
+        expect($hasNrPeriods)->toBeTrue('Should contain nr_periods');
+        expect($hasNrThrottled)->toBeTrue('Should contain nr_throttled');
+        expect($hasThrottledUsec)->toBeTrue('Should contain throttled_usec');
 
         // Parse values
         preg_match('/nr_periods (\d+)/', $cpuStat, $periodsMatch);
@@ -126,7 +131,11 @@ describe('Docker CgroupV2 - CPU Throttling', function () {
 
                 $burst = (int) $burstStr;
                 expect($burst)->toBeGreaterThan(0, 'CPU burst should be positive if set');
+            } else {
+                expect($burstStr)->toBeIn(['0', 'max'], 'CPU burst should be 0 or max');
             }
+        } else {
+            expect(true)->toBeTrue('cpu.max.burst file not present');
         }
     });
 

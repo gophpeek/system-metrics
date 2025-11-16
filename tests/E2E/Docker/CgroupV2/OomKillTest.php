@@ -245,7 +245,7 @@ Cgroup v2 advantages:
 TEXT;
 
         expect($instructions)->toBeString('Instructions provided');
-        expect($instructions)->toContain('512m', 'References correct memory limit');
-        expect($instructions)->toContain('memory.pressure', 'References PSI feature');
+        expect(str_contains($instructions, '512m'))->toBeTrue('References correct memory limit');
+        expect(str_contains($instructions, 'memory.pressure'))->toBeTrue('References PSI feature');
     });
 });
