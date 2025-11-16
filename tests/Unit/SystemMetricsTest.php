@@ -76,8 +76,8 @@ describe('SystemMetrics Facade', function () {
 
         if ($result->isSuccess()) {
             $limits = $result->getValue();
-            expect($limits->cpuLimit)->toBeGreaterThan(0.0);
-            expect($limits->memoryLimitBytes)->toBeGreaterThan(0);
+            expect($limits->cpuCores)->toBeGreaterThan(0);
+            expect($limits->memoryBytes)->toBeGreaterThan(0);
         }
     });
 
@@ -134,7 +134,8 @@ describe('SystemMetrics Facade', function () {
         if ($result->isSuccess()) {
             $delta = $result->getValue();
             expect($delta->usagePercentage())->toBeGreaterThanOrEqual(0.0);
-            expect($delta->usagePercentage())->toBeLessThanOrEqual(100.0 * $delta->coreCount());
+            $coreCount = count($delta->perCoreDelta);
+            expect($delta->usagePercentage())->toBeLessThanOrEqual(100.0 * $coreCount);
         }
     })->skip(function () {
         // Skip if we can't get CPU metrics
@@ -189,9 +190,9 @@ describe('SystemMetrics Facade', function () {
         // Overview might fail if CPU fails (on modern macOS)
         if ($result->isSuccess()) {
             $overview = $result->getValue();
-            expect($overview->environment)->toBeDefined();
-            expect($overview->cpu)->toBeDefined();
-            expect($overview->memory)->toBeDefined();
+            expect($overview->environment)->toBeInstanceOf(\PHPeek\SystemMetrics\DTO\Environment\EnvironmentSnapshot::class);
+            expect($overview->cpu)->toBeInstanceOf(\PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuSnapshot::class);
+            expect($overview->memory)->toBeInstanceOf(\PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot::class);
         } else {
             expect($result->isFailure())->toBeTrue();
         }
@@ -213,10 +214,10 @@ describe('SystemMetrics Facade', function () {
             expect($overview->memory->totalBytes)->toBeGreaterThan(0);
 
             // Storage should be available
-            expect($overview->storage)->toBeDefined();
+            expect($overview->storage)->toBeInstanceOf(\PHPeek\SystemMetrics\DTO\Metrics\Storage\StorageSnapshot::class);
 
             // Network should be available
-            expect($overview->network)->toBeDefined();
+            expect($overview->network)->toBeInstanceOf(\PHPeek\SystemMetrics\DTO\Metrics\Network\NetworkSnapshot::class);
         } else {
             // If overview fails, verify it's a proper failure
             expect($result->isFailure())->toBeTrue();
