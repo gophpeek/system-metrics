@@ -34,17 +34,46 @@ use PHPeek\SystemMetrics\DTO\SystemOverview;
 final class SystemMetrics
 {
     /**
+     * Cached environment detection result.
+     *
+     * Environment data (OS, kernel, architecture, virtualization, containers)
+     * is static and never changes during process lifetime, so it's safe to cache.
+     *
+     * @var Result<EnvironmentSnapshot>|null
+     */
+    private static ?Result $cachedEnvironment = null;
+
+    /**
      * Detect the current system environment.
+     *
+     * This method caches the result after the first call, as environment data
+     * (OS, kernel, architecture, virtualization, containers) never changes
+     * during process lifetime.
      *
      * @return Result<EnvironmentSnapshot>
      */
     public static function environment(): Result
     {
-        $action = new DetectEnvironmentAction(
-            SystemMetricsConfig::getEnvironmentDetector()
-        );
+        if (self::$cachedEnvironment === null) {
+            $action = new DetectEnvironmentAction(
+                SystemMetricsConfig::getEnvironmentDetector()
+            );
 
-        return $action->execute();
+            self::$cachedEnvironment = $action->execute();
+        }
+
+        return self::$cachedEnvironment;
+    }
+
+    /**
+     * Clear the cached environment detection result.
+     *
+     * Useful for testing or when you need to force a fresh detection.
+     * Not normally needed in production code.
+     */
+    public static function clearEnvironmentCache(): void
+    {
+        self::$cachedEnvironment = null;
     }
 
     /**
