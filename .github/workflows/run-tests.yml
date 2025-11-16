@@ -51,7 +51,7 @@ jobs:
         run: composer show -D
 
       - name: Execute unit tests
-        run: vendor/bin/pest --ci tests/Unit/ tests/ExampleTest.php tests/ArchTest.php
+        run: vendor/bin/pest --ci --no-coverage tests/Unit/ tests/ExampleTest.php tests/ArchTest.php
 
       - name: Start Docker containers for E2E tests
         run: docker compose -f e2e/compose/docker-compose.yml up -d
@@ -60,7 +60,7 @@ jobs:
         run: sleep 5
 
       - name: Execute E2E tests (Docker only)
-        run: vendor/bin/pest --ci tests/E2E/Docker/
+        run: vendor/bin/pest --ci --no-coverage tests/E2E/Docker/
 
       - name: Stop Docker containers
         if: always()
