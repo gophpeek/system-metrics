@@ -12,7 +12,6 @@ use PHPeek\SystemMetrics\DTO\Metrics\Container\CgroupVersion;
 use PHPeek\SystemMetrics\DTO\Metrics\LimitSource;
 use PHPeek\SystemMetrics\DTO\Metrics\SystemLimits;
 use PHPeek\SystemMetrics\DTO\Result;
-use PHPeek\SystemMetrics\Exceptions\SystemMetricsException;
 use PHPeek\SystemMetrics\Sources\Container\CompositeContainerMetricsSource;
 use PHPeek\SystemMetrics\Sources\Cpu\CompositeCpuMetricsSource;
 use PHPeek\SystemMetrics\Sources\Memory\CompositeMemoryMetricsSource;

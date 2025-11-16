@@ -1,6 +1,5 @@
 <?php
 
-use PHPeek\SystemMetrics\DTO\Metrics\Storage\DiskIOStats;
 use PHPeek\SystemMetrics\DTO\Metrics\Storage\FileSystemType;
 use PHPeek\SystemMetrics\DTO\Metrics\Storage\MountPoint;
 use PHPeek\SystemMetrics\DTO\Metrics\Storage\StorageSnapshot;
