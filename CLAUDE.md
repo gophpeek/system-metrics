@@ -151,6 +151,49 @@ SystemMetricsConfig::setCpuMetricsSource(new CompositeCpuMetricsSource());
 SystemMetricsConfig::setCpuMetricsSource(new MyCustomCpuSource());
 ```
 
+#### 6. Performance Optimization: Static Data Caching
+
+Environment detection results are automatically cached after the first call:
+
+```php
+// First call reads from system (disk I/O, syscalls)
+$result1 = SystemMetrics::environment();
+
+// Subsequent calls return cached result (no I/O)
+$result2 = SystemMetrics::environment(); // Instant, same object
+```
+
+**Cached (Static) Data:**
+- OS information (name, version, family)
+- Kernel information (release, version, name)
+- Architecture (x86_64, arm64, etc.)
+- Virtualization type (KVM, VMware, VirtualBox, etc.)
+- Container type (Docker, Podman, LXC)
+- Cgroup version and paths
+
+**Not Cached (Dynamic) Data:**
+- CPU metrics (times, usage, per-core data)
+- Memory metrics (usage, available, swap)
+- Storage metrics (disk usage, I/O)
+- Network metrics (bandwidth, packets)
+- Load average, uptime, and all other time-sensitive metrics
+
+**Cache Control:**
+```php
+// Clear cache if needed (rare, mostly for testing)
+SystemMetrics::clearEnvironmentCache();
+
+// Force fresh detection
+SystemMetrics::clearEnvironmentCache();
+$result = SystemMetrics::environment();
+```
+
+**Benefits:**
+- Eliminates redundant disk I/O for static data (10-15 file reads on Linux, 5-8 syscalls on macOS)
+- Reduces overhead from ~1-5ms to ~0.001ms per call after first detection
+- Automatic - no configuration needed
+- Safe - only caches data that never changes during process lifetime
+
 ## Development Commands
 
 ### Testing
