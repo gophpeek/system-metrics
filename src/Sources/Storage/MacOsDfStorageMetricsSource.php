@@ -37,8 +37,11 @@ final class MacOsDfStorageMetricsSource implements StorageMetricsSource
 
         $mountPointsResult = $this->dfParser->parse($dfResult->getValue());
         if ($mountPointsResult->isFailure()) {
+            $error = $mountPointsResult->getError();
+            assert($error !== null);
+
             /** @var Result<StorageSnapshot> */
-            return Result::failure($mountPointsResult->getError());
+            return Result::failure($error);
         }
 
         $mountPoints = $mountPointsResult->getValue();

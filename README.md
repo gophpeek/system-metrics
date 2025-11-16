@@ -299,6 +299,106 @@ Load average represents the number of processes in the run queue (runnable + wai
 
 **Note:** Load average ≠ CPU usage percentage. A system with high I/O wait can have high load but low CPU usage.
 
+### ✅ Storage Metrics
+
+Get filesystem and disk I/O statistics:
+
+```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
+$storage = SystemMetrics::storage()->getValue();
+
+// Mount Points (filesystem usage)
+foreach ($storage->mountPoints as $mount) {
+    echo "Device: {$mount->device}\n";
+    echo "Mount Point: {$mount->mountPoint}\n";
+    echo "Filesystem: {$mount->fsType->value}\n";
+    echo "Total: " . round($mount->totalBytes / 1024**3, 2) . " GB\n";
+    echo "Used: " . round($mount->usedBytes / 1024**3, 2) . " GB\n";
+    echo "Available: " . round($mount->availableBytes / 1024**3, 2) . " GB\n";
+    echo "Usage: " . round($mount->usedPercentage(), 1) . "%\n";
+    echo "Inodes: {$mount->usedInodes} / {$mount->totalInodes}\n\n";
+}
+
+// Disk I/O Statistics (cumulative counters)
+foreach ($storage->diskIO as $disk) {
+    echo "Device: {$disk->device}\n";
+    echo "Reads: {$disk->readsCompleted} operations, " . round($disk->readBytes / 1024**2, 2) . " MB\n";
+    echo "Writes: {$disk->writesCompleted} operations, " . round($disk->writeBytes / 1024**2, 2) . " MB\n";
+    echo "I/O Time: {$disk->ioTimeMs} ms\n";
+    echo "Total Operations: {$disk->totalOperations()}\n";
+    echo "Total Bytes: " . round($disk->totalBytes() / 1024**3, 2) . " GB\n\n";
+}
+
+// Aggregate statistics
+echo "Total Storage: " . round($storage->totalBytes() / 1024**3, 2) . " GB\n";
+echo "Total Used: " . round($storage->usedBytes() / 1024**3, 2) . " GB\n";
+echo "Overall Usage: " . round($storage->usedPercentage(), 1) . "%\n";
+```
+
+**Note:** Disk I/O counters are cumulative since boot. To get I/O rates (MB/s, IOPS), take two snapshots and calculate the delta over time.
+
+**Filesystem Types:**
+- Linux: ext2, ext3, ext4, xfs, btrfs, zfs, tmpfs, nfs, etc.
+- macOS: apfs, hfs, hfs+, ntfs, fat32, exfat
+
+### ✅ Network Metrics
+
+Get network interface statistics and connection information:
+
+```php
+use PHPeek\SystemMetrics\SystemMetrics;
+
+$network = SystemMetrics::network()->getValue();
+
+// Network Interfaces
+foreach ($network->interfaces as $interface) {
+    echo "Interface: {$interface->name}\n";
+    echo "Type: {$interface->type->value}\n";
+    echo "MAC Address: {$interface->macAddress}\n";
+    echo "Status: " . ($interface->isUp ? 'UP' : 'DOWN') . "\n";
+    echo "MTU: {$interface->mtu}\n";
+
+    // Traffic statistics (cumulative counters)
+    $stats = $interface->stats;
+    echo "Received: " . round($stats->bytesReceived / 1024**2, 2) . " MB ({$stats->packetsReceived} packets)\n";
+    echo "Sent: " . round($stats->bytesSent / 1024**2, 2) . " MB ({$stats->packetsSent} packets)\n";
+    echo "Errors: RX {$stats->receiveErrors}, TX {$stats->transmitErrors}\n";
+    echo "Drops: RX {$stats->receiveDrops}, TX {$stats->transmitDrops}\n";
+    echo "Total: " . round($stats->totalBytes() / 1024**2, 2) . " MB ({$stats->totalPackets()} packets)\n\n";
+}
+
+// Connection Statistics (if available)
+if ($network->connections !== null) {
+    $conn = $network->connections;
+    echo "=== CONNECTIONS ===\n";
+    echo "TCP Established: {$conn->tcpEstablished}\n";
+    echo "TCP Listening: {$conn->tcpListening}\n";
+    echo "TCP Time Wait: {$conn->tcpTimeWait}\n";
+    echo "UDP Listening: {$conn->udpListening}\n";
+    echo "Total Connections: {$conn->totalConnections}\n";
+}
+
+// Aggregate statistics
+echo "\n=== TOTALS ===\n";
+echo "Total Received: " . round($network->totalBytesReceived() / 1024**3, 2) . " GB\n";
+echo "Total Sent: " . round($network->totalBytesSent() / 1024**3, 2) . " GB\n";
+echo "Total Packets: " . $network->totalPacketsReceived() + $network->totalPacketsSent() . "\n";
+```
+
+**Note:** Network counters are cumulative since boot. To get bandwidth (MB/s), take two snapshots and calculate the delta.
+
+**Interface Types:**
+- `ethernet`: Wired Ethernet interfaces (eth*, en*)
+- `wifi`: Wireless interfaces (wlan*, wl*, wi*)
+- `loopback`: Loopback interface (lo, lo0)
+- `bridge`: Bridge interfaces (br*)
+- `vlan`: VLAN interfaces (vlan*)
+- `vpn`: VPN interfaces (vpn*, tun*, tap*)
+- `cellular`: Mobile data (ppp*, wwan*)
+- `bluetooth`: Bluetooth interfaces (bt*)
+- `other`: Unknown or virtual interfaces
+
 ### ✅ Process-Level Monitoring
 
 Monitor resource usage for individual processes or process groups:

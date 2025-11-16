@@ -16,6 +16,8 @@ final class SystemOverviewAction
         private readonly DetectEnvironmentAction $environmentAction,
         private readonly ReadCpuMetricsAction $cpuAction,
         private readonly ReadMemoryMetricsAction $memoryAction,
+        private readonly ReadStorageMetricsAction $storageAction,
+        private readonly ReadNetworkMetricsAction $networkAction,
     ) {}
 
     /**
@@ -52,10 +54,30 @@ final class SystemOverviewAction
             return Result::failure($error);
         }
 
+        $storageResult = $this->storageAction->execute();
+        if ($storageResult->isFailure()) {
+            $error = $storageResult->getError();
+            assert($error !== null);
+
+            /** @var Result<SystemOverview> */
+            return Result::failure($error);
+        }
+
+        $networkResult = $this->networkAction->execute();
+        if ($networkResult->isFailure()) {
+            $error = $networkResult->getError();
+            assert($error !== null);
+
+            /** @var Result<SystemOverview> */
+            return Result::failure($error);
+        }
+
         return Result::success(new SystemOverview(
             environment: $environmentResult->getValue(),
             cpu: $cpuResult->getValue(),
             memory: $memoryResult->getValue(),
+            storage: $storageResult->getValue(),
+            network: $networkResult->getValue(),
         ));
     }
 }

@@ -37,8 +37,11 @@ final class LinuxProcNetworkMetricsSource implements NetworkMetricsSource
 
         $interfacesResult = $this->netDevParser->parse($netDevResult->getValue());
         if ($interfacesResult->isFailure()) {
+            $error = $interfacesResult->getError();
+            assert($error !== null);
+
             /** @var Result<NetworkSnapshot> */
-            return Result::failure($interfacesResult->getError());
+            return Result::failure($error);
         }
 
         $interfaces = $interfacesResult->getValue();

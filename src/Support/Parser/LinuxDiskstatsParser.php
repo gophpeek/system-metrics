@@ -34,13 +34,13 @@ final class LinuxDiskstatsParser
      */
     public function parse(string $content): Result
     {
-        $lines = explode("\n", trim($content));
-
-        if (count($lines) === 0) {
+        $content = trim($content);
+        if ($content === '') {
             /** @var Result<DiskIOStats[]> */
             return Result::failure(new ParseException('diskstats content is empty'));
         }
 
+        $lines = explode("\n", $content);
         $diskStats = [];
 
         foreach ($lines as $line) {

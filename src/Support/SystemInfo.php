@@ -41,7 +41,7 @@ final class SystemInfo
         // Fallback to sysconf if available (requires POSIX extension)
         if (function_exists('posix_sysconf') && defined('POSIX_SC_PAGESIZE')) {
             $pageSize = @posix_sysconf(POSIX_SC_PAGESIZE);
-            if ($pageSize !== false && $pageSize > 0) {
+            if ($pageSize > 0) {
                 self::$pageSize = $pageSize;
 
                 return $pageSize;

@@ -24,7 +24,8 @@
       "Bash(vendor/bin/phpstan analyse:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(ps:*)"
+      "Bash(ps:*)",
+      "mcp__serena__think_about_whether_you_are_done"
     ],
     "deny": [],
     "ask": []

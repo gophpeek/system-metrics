@@ -5,10 +5,14 @@ declare(strict_types=1);
 use PHPeek\SystemMetrics\Actions\DetectEnvironmentAction;
 use PHPeek\SystemMetrics\Actions\ReadCpuMetricsAction;
 use PHPeek\SystemMetrics\Actions\ReadMemoryMetricsAction;
+use PHPeek\SystemMetrics\Actions\ReadNetworkMetricsAction;
+use PHPeek\SystemMetrics\Actions\ReadStorageMetricsAction;
 use PHPeek\SystemMetrics\Actions\SystemOverviewAction;
 use PHPeek\SystemMetrics\Contracts\CpuMetricsSource;
 use PHPeek\SystemMetrics\Contracts\EnvironmentDetector;
 use PHPeek\SystemMetrics\Contracts\MemoryMetricsSource;
+use PHPeek\SystemMetrics\Contracts\NetworkMetricsSource;
+use PHPeek\SystemMetrics\Contracts\StorageMetricsSource;
 use PHPeek\SystemMetrics\DTO\Environment\Architecture;
 use PHPeek\SystemMetrics\DTO\Environment\ArchitectureKind;
 use PHPeek\SystemMetrics\DTO\Environment\Cgroup;
@@ -24,6 +28,8 @@ use PHPeek\SystemMetrics\DTO\Environment\VirtualizationType;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuSnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuTimes;
 use PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot;
+use PHPeek\SystemMetrics\DTO\Metrics\Network\NetworkSnapshot;
+use PHPeek\SystemMetrics\DTO\Metrics\Storage\StorageSnapshot;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\DTO\SystemOverview;
 use PHPeek\SystemMetrics\Exceptions\SystemMetricsException;
@@ -126,13 +132,57 @@ class FakeFailureMemorySource implements MemoryMetricsSource
     }
 }
 
+class FakeSuccessStorageSource implements StorageMetricsSource
+{
+    public function read(): Result
+    {
+        return Result::success(
+            new StorageSnapshot(
+                mountPoints: [],
+                diskIO: []
+            )
+        );
+    }
+}
+
+class FakeFailureStorageSource implements StorageMetricsSource
+{
+    public function read(): Result
+    {
+        return Result::failure(new SystemMetricsException('Storage metrics read failed'));
+    }
+}
+
+class FakeSuccessNetworkSource implements NetworkMetricsSource
+{
+    public function read(): Result
+    {
+        return Result::success(
+            new NetworkSnapshot(
+                interfaces: [],
+                connections: null
+            )
+        );
+    }
+}
+
+class FakeFailureNetworkSource implements NetworkMetricsSource
+{
+    public function read(): Result
+    {
+        return Result::failure(new SystemMetricsException('Network metrics read failed'));
+    }
+}
+
 describe('SystemOverviewAction', function () {
     it('collects complete system overview successfully', function () {
         $environmentAction = new DetectEnvironmentAction(new FakeSuccessEnvironmentDetector);
         $cpuAction = new ReadCpuMetricsAction(new FakeSuccessCpuSource);
         $memoryAction = new ReadMemoryMetricsAction(new FakeSuccessMemorySource);
+        $storageAction = new ReadStorageMetricsAction(new FakeSuccessStorageSource);
+        $networkAction = new ReadNetworkMetricsAction(new FakeSuccessNetworkSource);
 
-        $action = new SystemOverviewAction($environmentAction, $cpuAction, $memoryAction);
+        $action = new SystemOverviewAction($environmentAction, $cpuAction, $memoryAction, $storageAction, $networkAction);
         $result = $action->execute();
 
         expect($result->isSuccess())->toBeTrue();
@@ -141,6 +191,8 @@ describe('SystemOverviewAction', function () {
         expect($overview->environment)->toBeInstanceOf(EnvironmentSnapshot::class);
         expect($overview->cpu)->toBeInstanceOf(CpuSnapshot::class);
         expect($overview->memory)->toBeInstanceOf(MemorySnapshot::class);
+        expect($overview->storage)->toBeInstanceOf(StorageSnapshot::class);
+        expect($overview->network)->toBeInstanceOf(NetworkSnapshot::class);
     });
 
     it('propagates environment detection failure', function () {
@@ -148,7 +200,10 @@ describe('SystemOverviewAction', function () {
         $cpuAction = new ReadCpuMetricsAction(new FakeSuccessCpuSource);
         $memoryAction = new ReadMemoryMetricsAction(new FakeSuccessMemorySource);
 
-        $action = new SystemOverviewAction($environmentAction, $cpuAction, $memoryAction);
+        $storageAction = new ReadStorageMetricsAction(new FakeSuccessStorageSource);
+        $networkAction = new ReadNetworkMetricsAction(new FakeSuccessNetworkSource);
+
+        $action = new SystemOverviewAction($environmentAction, $cpuAction, $memoryAction, $storageAction, $networkAction);
         $result = $action->execute();
 
         expect($result->isFailure())->toBeTrue();
@@ -161,7 +216,10 @@ describe('SystemOverviewAction', function () {
         $cpuAction = new ReadCpuMetricsAction(new FakeFailureCpuSource);
         $memoryAction = new ReadMemoryMetricsAction(new FakeSuccessMemorySource);
 
-        $action = new SystemOverviewAction($environmentAction, $cpuAction, $memoryAction);
+        $storageAction = new ReadStorageMetricsAction(new FakeSuccessStorageSource);
+        $networkAction = new ReadNetworkMetricsAction(new FakeSuccessNetworkSource);
+
+        $action = new SystemOverviewAction($environmentAction, $cpuAction, $memoryAction, $storageAction, $networkAction);
         $result = $action->execute();
 
         expect($result->isFailure())->toBeTrue();
@@ -174,11 +232,44 @@ describe('SystemOverviewAction', function () {
         $cpuAction = new ReadCpuMetricsAction(new FakeSuccessCpuSource);
         $memoryAction = new ReadMemoryMetricsAction(new FakeFailureMemorySource);
 
-        $action = new SystemOverviewAction($environmentAction, $cpuAction, $memoryAction);
+        $storageAction = new ReadStorageMetricsAction(new FakeSuccessStorageSource);
+        $networkAction = new ReadNetworkMetricsAction(new FakeSuccessNetworkSource);
+
+        $action = new SystemOverviewAction($environmentAction, $cpuAction, $memoryAction, $storageAction, $networkAction);
         $result = $action->execute();
 
         expect($result->isFailure())->toBeTrue();
         expect($result->getError())->toBeInstanceOf(SystemMetricsException::class);
         expect($result->getError()->getMessage())->toBe('Memory metrics read failed');
+    });
+
+    it('propagates storage metrics failure', function () {
+        $environmentAction = new DetectEnvironmentAction(new FakeSuccessEnvironmentDetector);
+        $cpuAction = new ReadCpuMetricsAction(new FakeSuccessCpuSource);
+        $memoryAction = new ReadMemoryMetricsAction(new FakeSuccessMemorySource);
+        $storageAction = new ReadStorageMetricsAction(new FakeFailureStorageSource);
+        $networkAction = new ReadNetworkMetricsAction(new FakeSuccessNetworkSource);
+
+        $action = new SystemOverviewAction($environmentAction, $cpuAction, $memoryAction, $storageAction, $networkAction);
+        $result = $action->execute();
+
+        expect($result->isFailure())->toBeTrue();
+        expect($result->getError())->toBeInstanceOf(SystemMetricsException::class);
+        expect($result->getError()->getMessage())->toBe('Storage metrics read failed');
+    });
+
+    it('propagates network metrics failure', function () {
+        $environmentAction = new DetectEnvironmentAction(new FakeSuccessEnvironmentDetector);
+        $cpuAction = new ReadCpuMetricsAction(new FakeSuccessCpuSource);
+        $memoryAction = new ReadMemoryMetricsAction(new FakeSuccessMemorySource);
+        $storageAction = new ReadStorageMetricsAction(new FakeSuccessStorageSource);
+        $networkAction = new ReadNetworkMetricsAction(new FakeFailureNetworkSource);
+
+        $action = new SystemOverviewAction($environmentAction, $cpuAction, $memoryAction, $storageAction, $networkAction);
+        $result = $action->execute();
+
+        expect($result->isFailure())->toBeTrue();
+        expect($result->getError())->toBeInstanceOf(SystemMetricsException::class);
+        expect($result->getError()->getMessage())->toBe('Network metrics read failed');
     });
 });

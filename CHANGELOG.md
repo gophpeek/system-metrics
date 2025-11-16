@@ -5,6 +5,60 @@ All notable changes to `system-metrics` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.3.0 - 2025-01-XX
+
+### Added
+- **Storage Metrics**: Complete filesystem and disk I/O monitoring system
+  - `SystemMetrics::storage()` facade method for storage metrics
+  - `StorageSnapshot`: Complete storage state with filesystem and I/O data
+  - `MountPoint`: Filesystem mount information with usage statistics
+  - `DiskIOStats`: Disk I/O counters (reads, writes, bytes, I/O time)
+  - Helper methods: `usedPercentage()`, `availablePercentage()`, `totalBytes()`
+  - `FileSystemType` enum: ext4, xfs, btrfs, zfs, apfs, hfs+, ntfs, fat32, tmpfs, devtmpfs
+  - Linux support via `/proc/mounts` and `/proc/diskstats` parsing
+  - macOS support via `df` and `iostat` commands
+  - Composite source with automatic platform detection
+  - `ReadStorageMetricsAction` for storage retrieval
+  - Parsers: `LinuxMountsParser`, `LinuxDiskstatsParser`, `MacOsDfParser`, `MacOsIostatParser`
+  - Sources: `LinuxProcStorageMetricsSource`, `MacOsDfStorageMetricsSource`, `CompositeStorageMetricsSource`
+  - `StorageMetricsSource` contract interface
+- **Network Metrics**: Complete network interface and connection monitoring system
+  - `SystemMetrics::network()` facade method for network metrics
+  - `NetworkSnapshot`: Complete network state with interfaces and connections
+  - `NetworkInterface`: Interface statistics and configuration
+  - `NetworkInterfaceStats`: Detailed traffic counters (bytes, packets, errors, drops)
+  - `NetworkConnectionStats`: TCP/UDP connection state counters
+  - Helper methods: `totalBytes()`, `totalPackets()`, `totalErrors()`, `totalDrops()`
+  - `NetworkInterfaceType` enum: ethernet, wifi, loopback, bridge, vlan, vpn, cellular, bluetooth, other
+  - Linux support via `/proc/net/dev` and `/proc/net/tcp|udp` parsing
+  - macOS support via `netstat` commands
+  - Composite source with automatic platform detection
+  - `ReadNetworkMetricsAction` for network retrieval
+  - Parsers: `LinuxProcNetDevParser`, `LinuxProcNetTcpParser`, `MacOsNetstatParser`, `MacOsNetstatInterfaceParser`
+  - Sources: `LinuxProcNetworkMetricsSource`, `MacOsNetstatNetworkMetricsSource`, `CompositeNetworkMetricsSource`
+  - `NetworkMetricsSource` contract interface
+- **SystemOverview Integration**: Storage and network included in system overview
+  - `SystemMetrics::overview()` now includes storage and network snapshots
+  - `SystemOverview` DTO expanded with storage and network properties
+- 110 new comprehensive unit tests for storage and network (507 total tests, 1308 assertions)
+
+### Changed
+- Updated README with Storage Metrics and Network Metrics sections including usage examples
+- Updated SystemOverview to include storage and network data
+- Added `/proc/mounts`, `/proc/diskstats`, `/proc/net/dev`, `/proc/net/tcp`, `/proc/net/udp` to Linux requirements
+- Added `df`, `iostat`, `netstat` commands to macOS command list
+
+### Technical Details
+- PHPStan Level 9 compliance maintained (0 errors)
+- All DTOs use readonly classes for immutability
+- Railway-oriented programming with Result<T> pattern
+- Storage and network metrics are cumulative counters (since boot)
+- Disk I/O sectors automatically converted to bytes (512 bytes/sector)
+- Network interfaces include link state (up/down) and MTU information
+- Partition devices automatically filtered (only whole disks reported)
+- Connection statistics may be null on platforms without support
+- Graceful handling of permission errors on restricted files
+
 ## 1.2.0 - 2025-01-XX
 
 ### Added

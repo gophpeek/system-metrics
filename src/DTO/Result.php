@@ -40,6 +40,7 @@ final readonly class Result
      *
      * @template U
      *
+     * @param  SystemMetricsException  $error
      * @return Result<U>
      *
      * @phpstan-ignore method.templateTypeNotInParameter
@@ -79,7 +80,7 @@ final readonly class Result
             throw $this->getErrorAsserted();
         }
 
-        /** @phpstan-ignore return.type */
+        /** @var T */
         return $this->value;
     }
 
@@ -93,8 +94,12 @@ final readonly class Result
      */
     public function getValueOr(mixed $default): mixed
     {
-        /** @phpstan-ignore return.type */
-        return $this->isSuccess() ? $this->value : $default;
+        if ($this->isSuccess()) {
+            /** @var T */
+            return $this->value;
+        }
+
+        return $default;
     }
 
     /**
@@ -132,8 +137,10 @@ final readonly class Result
             return self::failure($this->getErrorAsserted());
         }
 
-        /** @phpstan-ignore argument.type */
-        return self::success($mapper($this->value));
+        /** @var T $value */
+        $value = $this->value;
+
+        return self::success($mapper($value));
     }
 
     /**
@@ -145,8 +152,9 @@ final readonly class Result
     public function onSuccess(callable $callback): self
     {
         if ($this->isSuccess()) {
-            /** @phpstan-ignore argument.type */
-            $callback($this->value);
+            /** @var T $value */
+            $value = $this->value;
+            $callback($value);
         }
 
         return $this;

@@ -115,6 +115,8 @@ final class SystemMetrics
             new DetectEnvironmentAction(SystemMetricsConfig::getEnvironmentDetector()),
             new ReadCpuMetricsAction(SystemMetricsConfig::getCpuMetricsSource()),
             new ReadMemoryMetricsAction(SystemMetricsConfig::getMemoryMetricsSource()),
+            new ReadStorageMetricsAction,
+            new ReadNetworkMetricsAction,
         );
 
         return $action->execute();
