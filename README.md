@@ -118,6 +118,57 @@ echo "Capacity (5 min): " . round($normalized->fiveMinutesPercentage(), 1) . "%\
 echo "Capacity (15 min): " . round($normalized->fifteenMinutesPercentage(), 1) . "%\n\n";
 
 // ============================================
+// STORAGE METRICS
+// ============================================
+$storage = SystemMetrics::storage()->getValue();
+
+echo "=== STORAGE ===\n";
+foreach ($storage->mountPoints as $mount) {
+    if ($mount->totalBytes > 0) {
+        echo "Mount: {$mount->mountPoint} ({$mount->device})\n";
+        echo "  Type: {$mount->fileSystemType->value}\n";
+        echo "  Size: " . round($mount->totalBytes() / 1024**3, 2) . " GB\n";
+        echo "  Used: " . round($mount->usedPercentage(), 1) . "%\n";
+    }
+}
+echo "\n";
+
+// ============================================
+// NETWORK METRICS
+// ============================================
+$network = SystemMetrics::network()->getValue();
+
+echo "=== NETWORK ===\n";
+foreach ($network->interfaces as $iface) {
+    if ($iface->stats->totalBytes() > 0) {
+        echo "Interface: {$iface->name} ({$iface->type->value})\n";
+        echo "  Sent: " . round($iface->stats->txBytes / 1024**2, 2) . " MB\n";
+        echo "  Received: " . round($iface->stats->rxBytes / 1024**2, 2) . " MB\n";
+        echo "  Errors: {$iface->stats->totalErrors()}\n";
+    }
+}
+echo "\n";
+
+// ============================================
+// CONTAINER METRICS (Cgroups)
+// ============================================
+$container = SystemMetrics::container()->getValue();
+
+echo "=== CONTAINER ===\n";
+echo "Cgroup Version: {$container->cgroupVersion->value}\n";
+if ($container->hasCpuLimit()) {
+    echo "CPU Quota: {$container->cpuQuota} cores\n";
+    echo "CPU Usage: " . round($container->cpuUtilizationPercentage() ?? 0, 1) . "%\n";
+    echo "CPU Throttled: " . ($container->isCpuThrottled() ? 'YES' : 'no') . "\n";
+}
+if ($container->hasMemoryLimit()) {
+    echo "Memory Limit: " . round($container->memoryLimitBytes / 1024**3, 2) . " GB\n";
+    echo "Memory Usage: " . round($container->memoryUtilizationPercentage() ?? 0, 1) . "%\n";
+    echo "OOM Kills: " . ($container->hasOomKills() ? "YES ({$container->oomKillCount})" : 'no') . "\n";
+}
+echo "\n";
+
+// ============================================
 // PROCESS METRICS (Current Process)
 // ============================================
 $process = ProcessMetrics::snapshot(getmypid())->getValue();
@@ -162,6 +213,35 @@ Swap Used: 2.00 GB (12.5%)
 Capacity (1 min): 24.5%
 Capacity (5 min): 18.0%
 Capacity (15 min): 12.0%
+
+=== STORAGE ===
+Mount: / (disk1s1)
+  Type: apfs
+  Size: 500.00 GB
+  Used: 67.5%
+Mount: /System/Volumes/Data (disk1s2)
+  Type: apfs
+  Size: 500.00 GB
+  Used: 32.8%
+
+=== NETWORK ===
+Interface: en0 (ethernet)
+  Sent: 1234.56 MB
+  Received: 5678.90 MB
+  Errors: 0
+Interface: lo0 (loopback)
+  Sent: 12.34 MB
+  Received: 12.34 MB
+  Errors: 0
+
+=== CONTAINER ===
+Cgroup Version: v2
+CPU Quota: 2.0 cores
+CPU Usage: 45.3%
+CPU Throttled: no
+Memory Limit: 4.00 GB
+Memory Usage: 62.5%
+OOM Kills: no
 
 === CURRENT PROCESS (PID: 12345) ===
 Parent PID: 1234
