@@ -5,7 +5,7 @@ All notable changes to `system-metrics` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 1.5.0 - 2025-01-XX
+## [0.1.0] - 2025-11-16
 
 ### Added
 - **System Uptime Metrics**: Track system uptime since last boot
@@ -86,9 +86,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Railway-oriented programming with Result<T> pattern
 - 603 total tests, 1486 assertions
 
-## 1.4.0 - 2025-01-XX
-
-### Added
 - **Container Metrics (Cgroups)**: Full Docker/Kubernetes resource monitoring
   - `SystemMetrics::container()` facade method for container metrics
   - `ContainerLimits`: Complete container resource limits and usage
@@ -106,24 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `CompositeContainerMetricsSource`: Auto-detection with graceful fallback
   - `ReadContainerMetricsAction`: Action for container metrics retrieval
   - `ContainerMetricsSource` contract interface
-- 12 new comprehensive unit tests for container metrics (519 total tests, 1341 assertions)
 
-### Changed
-- Updated README with Container Metrics section including Docker/Kubernetes examples
-- Added cgroup requirements to Linux platform documentation
-
-### Technical Details
-- PHPStan Level 9 compliance maintained (0 errors)
-- Cgroup v1 and v2 auto-detection via `/sys/fs/cgroup/cgroup.controllers`
-- CPU usage calculated using deltas (microseconds for v2, nanoseconds for v1)
-- Unrealistic memory limits (> 8 EiB) treated as "no limit"
-- Graceful handling when cgroups not available (returns CgroupVersion::NONE)
-- Container-aware: reports actual container limits, not host resources
-- Cache for CPU usage deltas to ensure accurate utilization percentages
-
-## 1.3.0 - 2025-01-XX
-
-### Added
 - **Storage Metrics**: Complete filesystem and disk I/O monitoring system
   - `SystemMetrics::storage()` facade method for storage metrics
   - `StorageSnapshot`: Complete storage state with filesystem and I/O data
@@ -153,31 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Parsers: `LinuxProcNetDevParser`, `LinuxProcNetTcpParser`, `MacOsNetstatParser`, `MacOsNetstatInterfaceParser`
   - Sources: `LinuxProcNetworkMetricsSource`, `MacOsNetstatNetworkMetricsSource`, `CompositeNetworkMetricsSource`
   - `NetworkMetricsSource` contract interface
-- **SystemOverview Integration**: Storage and network included in system overview
-  - `SystemMetrics::overview()` now includes storage and network snapshots
-  - `SystemOverview` DTO expanded with storage and network properties
-- 110 new comprehensive unit tests for storage and network (507 total tests, 1308 assertions)
 
-### Changed
-- Updated README with Storage Metrics and Network Metrics sections including usage examples
-- Updated SystemOverview to include storage and network data
-- Added `/proc/mounts`, `/proc/diskstats`, `/proc/net/dev`, `/proc/net/tcp`, `/proc/net/udp` to Linux requirements
-- Added `df`, `iostat`, `netstat` commands to macOS command list
-
-### Technical Details
-- PHPStan Level 9 compliance maintained (0 errors)
-- All DTOs use readonly classes for immutability
-- Railway-oriented programming with Result<T> pattern
-- Storage and network metrics are cumulative counters (since boot)
-- Disk I/O sectors automatically converted to bytes (512 bytes/sector)
-- Network interfaces include link state (up/down) and MTU information
-- Partition devices automatically filtered (only whole disks reported)
-- Connection statistics may be null on platforms without support
-- Graceful handling of permission errors on restricted files
-
-## 1.2.0 - 2025-01-XX
-
-### Added
 - **Load Average Metrics**: System load average support without requiring delta calculations
   - `SystemMetrics::loadAverage()` facade method for instant load metrics
   - `LoadAverageSnapshot`: Raw load average values (1, 5, 15 minute intervals)
@@ -191,25 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `LinuxProcLoadavgParser` and `MacOsSysctlLoadavgParser`
   - `LinuxProcLoadAverageSource`, `MacOsSysctlLoadAverageSource`, `CompositeLoadAverageSource`
   - `LoadAverageSource` contract interface
-- 28 new comprehensive unit tests for load average (299 total tests, 723 assertions)
 
-### Changed
-- Updated README with Load Average section including usage examples and interpretation guide
-- Added `/proc/loadavg` to Linux permission requirements documentation
-- Added `sysctl vm.loadavg` to macOS command list in documentation
-
-### Technical Details
-- PHPStan Level 9 compliance maintained (0 errors)
-- All DTOs use readonly classes for immutability
-- Railway-oriented programming with Result<T> pattern
-- Load average values are raw counters (number of processes in run queue)
-- Normalization divides by core count to show system capacity (0-1.0 scale)
-- Percentage helpers multiply normalized values by 100 for easier interpretation
-- Graceful handling of zero core count edge case
-
-## 1.1.0 - 2025-01-XX
-
-### Added
 - **Process-Level Monitoring**: Complete process resource tracking system
   - `ProcessMetrics` facade for stateful tracking with start/sample/stop workflow
   - `ProcessTracker` class for object-oriented process monitoring
@@ -224,58 +162,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - macOS support via `ps` and `pgrep` commands
   - Composite source with automatic platform detection
   - Actions: `ReadProcessMetricsAction`, `ReadProcessGroupMetricsAction`
-- 52 new comprehensive unit tests for process monitoring (225 total tests, 547 assertions)
+
+- **Environment Detection**: Comprehensive system environment information
+  - Virtualization detection (KVM, QEMU, VMware, Hyper-V, VirtualBox, Parallels, etc.)
+  - Containerization detection (Docker, Kubernetes, containerd, cri-o, Podman, LXC)
+  - Cgroup v1 and v2 detection with paths
+
+- **CPU Metrics**: Raw time counters with per-core support
+  - Total and per-core CPU times (user, nice, system, idle, iowait, irq, softirq, steal)
+  - Helper methods: `total()`, `busy()`, `coreCount()`
+
+- **Memory Metrics**: Complete memory and swap information
+  - Total, free, available, used, buffers, and cached memory
+  - Swap memory metrics (total, free, used)
+  - Helper methods: `usedPercentage()`, `availablePercentage()`
 
 ### Changed
-- Updated README with process monitoring documentation and examples
-- Removed "Process-Level Metrics not available" limitation from documentation
-
-### Technical Details
-- PHPStan Level 9 compliance maintained (0 errors)
-- All DTOs use readonly classes for immutability
-- Railway-oriented programming with Result<T> pattern
-- Platform-specific implementations with graceful fallback
-- Best-effort child process enumeration
-
-## 1.0.0 - 2025-01-XX
-
-### Added
-- Initial production release
-- Environment detection with comprehensive OS, kernel, and architecture information
-- Virtualization detection (KVM, QEMU, VMware, Hyper-V, VirtualBox, Parallels, etc.)
-- Containerization detection (Docker, Kubernetes, containerd, cri-o, Podman, LXC)
-- Cgroup v1 and v2 detection with paths
-- CPU metrics with raw time counters (user, nice, system, idle, iowait, irq, softirq, steal)
-- Per-core CPU metrics support
-- Memory metrics with total, free, available, used, buffers, and cached information
-- Swap memory metrics (total, free, used)
-- Result<T> pattern for explicit error handling without exceptions
-- Composite sources with graceful fallback mechanism
-- Immutable DTOs using PHP 8.3 readonly classes
-- Action pattern for well-defined use cases
-- Interface-driven architecture for swappable implementations
-- Support for Linux (all distributions)
-- Support for macOS (Intel and Apple Silicon)
-- Helper methods on DTOs (total(), busy(), usedPercentage(), etc.)
-- SystemMetrics facade for simplified API
-- Comprehensive test suite (94 tests, 238 assertions)
-- PHPStan Level 5 static analysis compliance
-- Full documentation (README, CLAUDE.md, PRD-IMPLEMENTATION.md)
+- Updated README with comprehensive examples and use cases
+- Added documentation for all metric types
 
 ### Technical Details
 - PHP 8.3+ requirement for modern readonly class support
+- PHPStan Level 9 compliance (0 errors)
 - Pure PHP implementation with no external dependencies
 - Strict types throughout (`declare(strict_types=1)`)
+- Result<T> pattern for explicit error handling without exceptions
+- Immutable DTOs using readonly classes
+- Action pattern for well-defined use cases
+- Interface-driven architecture for swappable implementations
+- Composite sources with graceful fallback mechanism
 - PSR-4 autoloading
 - Laravel Pint for code style enforcement
-- Pest v4 for testing
+- Pest v4 for testing framework
+- 603 tests with 1486 assertions (100% pass rate)
 
 ### Platform Support
 - **Linux**: Full support via /proc and /sys filesystems
-- **macOS**: Full support via sysctl and vm_stat with graceful degradation
+- **macOS**: Full support via sysctl, vm_stat, ps, netstat, df, iostat
 - **Windows**: Not supported (will return appropriate errors)
 
 ### Known Limitations
 - Modern macOS (especially Apple Silicon) may return zero values for CPU metrics due to deprecated kern.cp_time sysctl
 - macOS swap metrics are best-effort due to dynamic swap management
 - Container environments may have restricted access to certain metrics
+- CPU usage percentage requires delta calculations (two snapshots)
