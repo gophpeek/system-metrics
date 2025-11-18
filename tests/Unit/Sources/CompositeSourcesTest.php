@@ -15,6 +15,7 @@ use PHPeek\SystemMetrics\DTO\Environment\OperatingSystem;
 use PHPeek\SystemMetrics\DTO\Environment\OsFamily;
 use PHPeek\SystemMetrics\DTO\Environment\Virtualization;
 use PHPeek\SystemMetrics\DTO\Environment\VirtualizationType;
+use PHPeek\SystemMetrics\DTO\Environment\VirtualizationVendor;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuSnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuTimes;
 use PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot;
@@ -61,7 +62,7 @@ class FakeEnvironmentDetector implements EnvironmentDetector
             os: new OperatingSystem(OsFamily::Linux, 'Fake', '1.0'),
             kernel: new Kernel('5.0', '5.0.0'),
             architecture: new Architecture(ArchitectureKind::X86_64, 'x86_64'),
-            virtualization: new Virtualization(VirtualizationType::BareMetal, null, null),
+            virtualization: new Virtualization(VirtualizationType::BareMetal, VirtualizationVendor::Unknown, null),
             containerization: new Containerization(ContainerType::None, null, false, null),
             cgroup: new Cgroup(CgroupVersion::None, null, null)
         ));

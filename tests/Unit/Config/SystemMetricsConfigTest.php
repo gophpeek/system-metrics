@@ -48,7 +48,7 @@ describe('SystemMetricsConfig', function () {
                         ),
                         virtualization: new \PHPeek\SystemMetrics\DTO\Environment\Virtualization(
                             type: \PHPeek\SystemMetrics\DTO\Environment\VirtualizationType::BareMetal,
-                            vendor: null,
+                            vendor: \PHPeek\SystemMetrics\DTO\Environment\VirtualizationVendor::Unknown,
                             rawIdentifier: null
                         ),
                         containerization: new \PHPeek\SystemMetrics\DTO\Environment\Containerization(
@@ -163,7 +163,7 @@ describe('SystemMetricsConfig', function () {
                         ),
                         virtualization: new \PHPeek\SystemMetrics\DTO\Environment\Virtualization(
                             type: \PHPeek\SystemMetrics\DTO\Environment\VirtualizationType::BareMetal,
-                            vendor: null,
+                            vendor: \PHPeek\SystemMetrics\DTO\Environment\VirtualizationVendor::Unknown,
                             rawIdentifier: null
                         ),
                         containerization: new \PHPeek\SystemMetrics\DTO\Environment\Containerization(
@@ -212,7 +212,7 @@ describe('SystemMetricsConfig', function () {
                         ),
                         virtualization: new \PHPeek\SystemMetrics\DTO\Environment\Virtualization(
                             type: \PHPeek\SystemMetrics\DTO\Environment\VirtualizationType::BareMetal,
-                            vendor: null,
+                            vendor: \PHPeek\SystemMetrics\DTO\Environment\VirtualizationVendor::Unknown,
                             rawIdentifier: null
                         ),
                         containerization: new \PHPeek\SystemMetrics\DTO\Environment\Containerization(

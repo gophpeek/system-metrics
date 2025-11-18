@@ -11,7 +11,7 @@ final readonly class Virtualization
 {
     public function __construct(
         public VirtualizationType $type,
-        public ?string $vendor,
+        public VirtualizationVendor $vendor,
         public ?string $rawIdentifier,
     ) {}
 }
