@@ -18,6 +18,7 @@ use PHPeek\SystemMetrics\DTO\Environment\OperatingSystem;
 use PHPeek\SystemMetrics\DTO\Environment\OsFamily;
 use PHPeek\SystemMetrics\DTO\Environment\Virtualization;
 use PHPeek\SystemMetrics\DTO\Environment\VirtualizationType;
+use PHPeek\SystemMetrics\DTO\Environment\VirtualizationVendor;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Support\FileReader;
 
@@ -109,17 +110,17 @@ final class LinuxEnvironmentDetector implements EnvironmentDetector
 
         // Common virtualization indicators
         $indicators = [
-            'KVM' => 'KVM',
-            'QEMU' => 'QEMU',
-            'VMware' => 'VMware',
-            'VirtualBox' => 'VirtualBox',
-            'Xen' => 'Xen',
-            'Microsoft' => 'Hyper-V',
-            'Bochs' => 'Bochs',
-            'Parallels' => 'Parallels',
-            'Amazon EC2' => 'AWS',
-            'Google' => 'Google Cloud',
-            'DigitalOcean' => 'DigitalOcean',
+            'KVM' => VirtualizationVendor::KVM,
+            'QEMU' => VirtualizationVendor::QEMU,
+            'VMware' => VirtualizationVendor::VMware,
+            'VirtualBox' => VirtualizationVendor::VirtualBox,
+            'Xen' => VirtualizationVendor::Xen,
+            'Microsoft' => VirtualizationVendor::HyperV,
+            'Bochs' => VirtualizationVendor::Bochs,
+            'Parallels' => VirtualizationVendor::Parallels,
+            'Amazon EC2' => VirtualizationVendor::AWS,
+            'Google' => VirtualizationVendor::GoogleCloud,
+            'DigitalOcean' => VirtualizationVendor::DigitalOcean,
         ];
 
         $combined = "{$productName} {$sysVendor}";
@@ -139,14 +140,14 @@ final class LinuxEnvironmentDetector implements EnvironmentDetector
         if (str_contains($cpuinfo, 'hypervisor')) {
             return new Virtualization(
                 type: VirtualizationType::VirtualMachine,
-                vendor: null,
+                vendor: VirtualizationVendor::Unknown,
                 rawIdentifier: 'hypervisor flag detected',
             );
         }
 
         return new Virtualization(
             type: VirtualizationType::BareMetal,
-            vendor: null,
+            vendor: VirtualizationVendor::Unknown,
             rawIdentifier: null,
         );
     }

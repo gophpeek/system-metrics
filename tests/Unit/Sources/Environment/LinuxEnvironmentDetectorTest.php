@@ -7,6 +7,7 @@ use PHPeek\SystemMetrics\DTO\Environment\ContainerType;
 use PHPeek\SystemMetrics\DTO\Environment\EnvironmentSnapshot;
 use PHPeek\SystemMetrics\DTO\Environment\OsFamily;
 use PHPeek\SystemMetrics\DTO\Environment\VirtualizationType;
+use PHPeek\SystemMetrics\DTO\Environment\VirtualizationVendor;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Exceptions\FileNotFoundException;
 use PHPeek\SystemMetrics\Sources\Environment\LinuxEnvironmentDetector;
@@ -103,7 +104,7 @@ describe('LinuxEnvironmentDetector', function () {
 
         $snapshot = $result->getValue();
         expect($snapshot->virtualization->type)->toBe(VirtualizationType::VirtualMachine);
-        expect($snapshot->virtualization->vendor)->toBe('KVM');
+        expect($snapshot->virtualization->vendor)->toBe(VirtualizationVendor::KVM);
     });
 
     it('detects VMware virtualization', function () {
@@ -117,7 +118,7 @@ describe('LinuxEnvironmentDetector', function () {
 
         $snapshot = $result->getValue();
         expect($snapshot->virtualization->type)->toBe(VirtualizationType::VirtualMachine);
-        expect($snapshot->virtualization->vendor)->toBe('VMware');
+        expect($snapshot->virtualization->vendor)->toBe(VirtualizationVendor::VMware);
     });
 
     it('detects VirtualBox virtualization', function () {
@@ -130,7 +131,7 @@ describe('LinuxEnvironmentDetector', function () {
         $result = $detector->detect();
 
         $snapshot = $result->getValue();
-        expect($snapshot->virtualization->vendor)->toBe('VirtualBox');
+        expect($snapshot->virtualization->vendor)->toBe(VirtualizationVendor::VirtualBox);
     });
 
     it('detects hypervisor flag in cpuinfo', function () {
@@ -158,7 +159,7 @@ describe('LinuxEnvironmentDetector', function () {
 
         $snapshot = $result->getValue();
         expect($snapshot->virtualization->type)->toBe(VirtualizationType::BareMetal);
-        expect($snapshot->virtualization->vendor)->toBeNull();
+        expect($snapshot->virtualization->vendor)->toBe(VirtualizationVendor::Unknown);
     });
 
     it('detects Docker container via dockerenv file', function () {

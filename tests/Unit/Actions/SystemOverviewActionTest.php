@@ -25,6 +25,7 @@ use PHPeek\SystemMetrics\DTO\Environment\OperatingSystem;
 use PHPeek\SystemMetrics\DTO\Environment\OsFamily;
 use PHPeek\SystemMetrics\DTO\Environment\Virtualization;
 use PHPeek\SystemMetrics\DTO\Environment\VirtualizationType;
+use PHPeek\SystemMetrics\DTO\Environment\VirtualizationVendor;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuSnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuTimes;
 use PHPeek\SystemMetrics\DTO\Metrics\Memory\MemorySnapshot;
@@ -56,7 +57,7 @@ class FakeSuccessEnvironmentDetector implements EnvironmentDetector
                 ),
                 virtualization: new Virtualization(
                     type: VirtualizationType::BareMetal,
-                    vendor: null,
+                    vendor: VirtualizationVendor::Unknown,
                     rawIdentifier: null
                 ),
                 containerization: new Containerization(

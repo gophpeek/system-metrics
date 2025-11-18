@@ -15,6 +15,7 @@ use PHPeek\SystemMetrics\DTO\Environment\OperatingSystem;
 use PHPeek\SystemMetrics\DTO\Environment\OsFamily;
 use PHPeek\SystemMetrics\DTO\Environment\Virtualization;
 use PHPeek\SystemMetrics\DTO\Environment\VirtualizationType;
+use PHPeek\SystemMetrics\DTO\Environment\VirtualizationVendor;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Exceptions\UnsupportedOperatingSystemException;
 use PHPeek\SystemMetrics\Sources\Environment\CompositeEnvironmentDetector;
@@ -50,7 +51,7 @@ describe('CompositeEnvironmentDetector', function () {
                         ),
                         virtualization: new Virtualization(
                             type: VirtualizationType::BareMetal,
-                            vendor: null,
+                            vendor: VirtualizationVendor::Unknown,
                             rawIdentifier: null
                         ),
                         containerization: new Containerization(
@@ -100,7 +101,7 @@ describe('CompositeEnvironmentDetector', function () {
                         ),
                         virtualization: new Virtualization(
                             type: VirtualizationType::BareMetal,
-                            vendor: null,
+                            vendor: VirtualizationVendor::Unknown,
                             rawIdentifier: null
                         ),
                         containerization: new Containerization(

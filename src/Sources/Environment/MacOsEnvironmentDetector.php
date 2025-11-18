@@ -17,6 +17,7 @@ use PHPeek\SystemMetrics\DTO\Environment\OperatingSystem;
 use PHPeek\SystemMetrics\DTO\Environment\OsFamily;
 use PHPeek\SystemMetrics\DTO\Environment\Virtualization;
 use PHPeek\SystemMetrics\DTO\Environment\VirtualizationType;
+use PHPeek\SystemMetrics\DTO\Environment\VirtualizationVendor;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Support\ProcessRunner;
 
@@ -98,7 +99,7 @@ final class MacOsEnvironmentDetector implements EnvironmentDetector
                 str_contains(strtolower($cpuBrand), 'qemu')) {
                 return new Virtualization(
                     type: VirtualizationType::VirtualMachine,
-                    vendor: null,
+                    vendor: VirtualizationVendor::Unknown,
                     rawIdentifier: $cpuBrand,
                 );
             }
@@ -109,14 +110,14 @@ final class MacOsEnvironmentDetector implements EnvironmentDetector
         if ($rosettaResult->isSuccess() && trim($rosettaResult->getValue()) === '1') {
             return new Virtualization(
                 type: VirtualizationType::VirtualMachine,
-                vendor: 'Rosetta 2',
+                vendor: VirtualizationVendor::Rosetta2,
                 rawIdentifier: 'sysctl.proc_translated=1',
             );
         }
 
         return new Virtualization(
             type: VirtualizationType::BareMetal,
-            vendor: null,
+            vendor: VirtualizationVendor::Unknown,
             rawIdentifier: null,
         );
     }
