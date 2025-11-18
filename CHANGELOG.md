@@ -5,6 +5,14 @@ All notable changes to `system-metrics` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.2.0 - 2025-11-18
+
+### What's Changed
+
+* Add comprehensive documentation structure by @sylvesterdamgaard in https://github.com/gophpeek/system-metrics/pull/6
+
+**Full Changelog**: https://github.com/gophpeek/system-metrics/compare/v1.1.0...v1.2.0
+
 ## v1.1.0 - 2025-11-18
 
 ### What's Changed
