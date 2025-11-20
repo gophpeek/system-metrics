@@ -69,8 +69,18 @@ final class FreeBSDSysctlCpuMetricsSource implements CpuMetricsSource
 
         // FreeBSD kern.cp_time returns array of 5 longs
         $cpTime = $ffi->new('long[5]');
-        $size = FFI::sizeof($cpTime);
+        // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+        if ($cpTime === null) {
+            return null;
+        }
+
         $sizePtr = $ffi->new('unsigned long');
+        // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+        if ($sizePtr === null) {
+            return null;
+        }
+
+        $size = FFI::sizeof($cpTime);
         // @phpstan-ignore property.notFound (FFI struct properties defined via cdef)
         $sizePtr->cdata = $size;
 
@@ -121,8 +131,18 @@ final class FreeBSDSysctlCpuMetricsSource implements CpuMetricsSource
         // Allocate buffer for all cores (ncpu * 5 longs)
         $bufferSize = $ncpu * 5;
         $cpTimes = $ffi->new("long[{$bufferSize}]");
-        $size = FFI::sizeof($cpTimes);
+        // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+        if ($cpTimes === null) {
+            return [];
+        }
+
         $sizePtr = $ffi->new('unsigned long');
+        // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+        if ($sizePtr === null) {
+            return [];
+        }
+
+        $size = FFI::sizeof($cpTimes);
         // @phpstan-ignore property.notFound (FFI struct properties defined via cdef)
         $sizePtr->cdata = $size;
 
@@ -173,8 +193,18 @@ final class FreeBSDSysctlCpuMetricsSource implements CpuMetricsSource
         $ffi = $this->getFFI();
 
         $ncpu = $ffi->new('int');
-        $size = FFI::sizeof($ncpu);
+        // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+        if ($ncpu === null) {
+            return 0;
+        }
+
         $sizePtr = $ffi->new('unsigned long');
+        // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+        if ($sizePtr === null) {
+            return 0;
+        }
+
+        $size = FFI::sizeof($ncpu);
         // @phpstan-ignore property.notFound (FFI struct properties defined via cdef)
         $sizePtr->cdata = $size;
 

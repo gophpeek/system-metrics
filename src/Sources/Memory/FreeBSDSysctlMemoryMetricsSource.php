@@ -109,8 +109,18 @@ final class FreeBSDSysctlMemoryMetricsSource implements MemoryMetricsSource
         $ffi = $this->getFFI();
 
         $value = $ffi->new('unsigned int');
+        // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+        if ($value === null) {
+            return null;
+        }
+
         $size = FFI::sizeof($value);
         $sizePtr = $ffi->new('unsigned long');
+        // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+        if ($sizePtr === null) {
+            return null;
+        }
+
         // @phpstan-ignore property.notFound (FFI struct properties defined via cdef)
         $sizePtr->cdata = $size;
 

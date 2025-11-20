@@ -28,8 +28,25 @@ final class FreeBSDSysctlUptimeSource implements UptimeSource
 
             // kern.boottime returns a timeval structure: {tv_sec, tv_usec}
             $bootTime = $ffi->new('struct timeval');
-            $size = FFI::sizeof($bootTime);
+            // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+            if ($bootTime === null) {
+                /** @var Result<UptimeSnapshot> */
+                return Result::failure(
+                    new SystemMetricsException('Failed to allocate memory for boottime structure')
+                );
+            }
+
             $sizePtr = $ffi->new('unsigned long');
+            // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+            if ($sizePtr === null) {
+                /** @var Result<UptimeSnapshot> */
+                return Result::failure(
+                    new SystemMetricsException('Failed to allocate memory for size pointer')
+                );
+            }
+
+            $size = FFI::sizeof($bootTime);
+
             // @phpstan-ignore property.notFound (FFI struct properties defined via cdef)
             $sizePtr->cdata = $size;
 

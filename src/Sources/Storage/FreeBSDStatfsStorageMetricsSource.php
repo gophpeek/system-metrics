@@ -85,6 +85,11 @@ final class FreeBSDStatfsStorageMetricsSource implements StorageMetricsSource
         $ffi = $this->getFFI();
 
         $mntbuf = $ffi->new('struct statfs*');
+        // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+        if ($mntbuf === null) {
+            return [];
+        }
+
 
         // @phpstan-ignore method.notFound (FFI methods defined via cdef)
         $count = $ffi->getmntinfo(FFI::addr($mntbuf), 1); // MNT_WAIT = 1
@@ -122,6 +127,11 @@ final class FreeBSDStatfsStorageMetricsSource implements StorageMetricsSource
         $ffi = $this->getFFI();
 
         $buf = $ffi->new('struct statfs');
+        // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+        if ($buf === null) {
+            return null;
+        }
+
 
         // @phpstan-ignore method.notFound (FFI methods defined via cdef)
         $result = $ffi->statfs($path, FFI::addr($buf));
