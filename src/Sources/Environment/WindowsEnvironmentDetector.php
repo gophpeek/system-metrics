@@ -289,7 +289,6 @@ final class WindowsEnvironmentDetector implements EnvironmentDetector
                 return null;
             }
 
-
             // Open registry key
             // @phpstan-ignore method.notFound (FFI methods defined via cdef)
             $result = $ffi->RegOpenKeyExA(
@@ -317,7 +316,6 @@ final class WindowsEnvironmentDetector implements EnvironmentDetector
                 return null;
             }
 
-
             // @phpstan-ignore method.notFound (FFI methods defined via cdef)
             $result = $ffi->RegQueryValueExA(
                 // @phpstan-ignore property.notFound (FFI struct properties defined via cdef)
@@ -344,7 +342,6 @@ final class WindowsEnvironmentDetector implements EnvironmentDetector
             if ($buffer === null) {
                 return null;
             }
-
 
             // @phpstan-ignore method.notFound (FFI methods defined via cdef)
             $result = $ffi->RegQueryValueExA(

@@ -144,7 +144,6 @@ final class WindowsFFIStorageMetricsSource implements StorageMetricsSource
                 );
             }
 
-
             // @phpstan-ignore method.notFound (FFI methods defined via cdef)
             $result = $ffi->GetDiskFreeSpaceExA(
                 $drive,
@@ -217,7 +216,6 @@ final class WindowsFFIStorageMetricsSource implements StorageMetricsSource
             if ($fileSystemFlags === null) {
                 return FileSystemType::OTHER;
             }
-
 
             // @phpstan-ignore method.notFound (FFI methods defined via cdef)
             $result = $ffi->GetVolumeInformationA(

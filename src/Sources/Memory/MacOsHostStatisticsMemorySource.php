@@ -162,7 +162,6 @@ final class MacOsHostStatisticsMemorySource implements MemoryMetricsSource
             return 0;
         }
 
-
         $result = $ffi->sysctlbyname( // @phpstan-ignore method.notFound (FFI methods defined via cdef)
             'hw.memsize',
             FFI::addr($memsize),
@@ -192,7 +191,6 @@ final class MacOsHostStatisticsMemorySource implements MemoryMetricsSource
         if ($pagesize === null) {
             return 0;
         }
-
 
         $result = $ffi->sysctlbyname( // @phpstan-ignore method.notFound (FFI methods defined via cdef)
             'vm.pagesize',

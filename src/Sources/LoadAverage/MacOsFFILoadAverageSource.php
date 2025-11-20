@@ -47,7 +47,6 @@ final class MacOsFFILoadAverageSource implements LoadAverageSource
                 );
             }
 
-
             $result = $ffi->getloadavg( // @phpstan-ignore method.notFound (FFI methods defined via cdef)
                 $loadavg, 3);
 

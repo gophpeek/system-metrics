@@ -69,7 +69,6 @@ final class WindowsFFICpuMetricsSource implements CpuMetricsSource
                 );
             }
 
-
             // Call GetSystemTimes
             $result = $ffi->GetSystemTimes( // @phpstan-ignore method.notFound (FFI methods defined via cdef)
                 FFI::addr($idleTime),

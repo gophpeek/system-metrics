@@ -84,7 +84,6 @@ final class MacOsHostProcessorInfoSource implements CpuMetricsSource
                 );
             }
 
-
             // @phpstan-ignore method.notFound (FFI methods defined via cdef)
             $kr = $ffi->host_processor_info(
                 $host,
