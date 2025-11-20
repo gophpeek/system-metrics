@@ -32,7 +32,7 @@ final class CompositeUptimeSource implements UptimeSource
         }
 
         if (OsDetector::isMacOs()) {
-            $source = new MacOsSysctlUptimeSource;
+            $source = new MacOsFFIUptimeSource;
 
             return $source->read();
         }
