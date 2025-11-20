@@ -39,6 +39,11 @@ final class MacOsFFILoadAverageSource implements LoadAverageSource
 
             // POSIX getloadavg() returns load average in double array
             $loadavg = $ffi->new('double[3]');
+            // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+            if ($loadavg === null) {
+                return null;
+            }
+
 
             $result = $ffi->getloadavg( // @phpstan-ignore method.notFound (FFI methods defined via cdef)
                 $loadavg, 3);

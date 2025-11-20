@@ -58,8 +58,23 @@ final class MacOsHostProcessorInfoSource implements CpuMetricsSource
             // @phpstan-ignore method.notFound (FFI methods defined via cdef)
             $host = $ffi->mach_host_self();
             $processor_count = $ffi->new('natural_t');
+            // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+            if ($processor_count === null) {
+                return null;
+            }
+
             $processor_info_addr = $ffi->new('vm_address_t');
+            // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+            if ($processor_info_addr === null) {
+                return null;
+            }
+
             $processor_info_count = $ffi->new('natural_t');
+            // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+            if ($processor_info_count === null) {
+                return null;
+            }
+
 
             // @phpstan-ignore method.notFound (FFI methods defined via cdef)
             $kr = $ffi->host_processor_info(
@@ -86,6 +101,11 @@ final class MacOsHostProcessorInfoSource implements CpuMetricsSource
 
             // Read CPU data from kernel memory using FFI::memcpy
             $data = $ffi->new("int[{$info_count}]");
+            // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+            if ($data === null) {
+                return null;
+            }
+
             $void_ptr = $ffi->cast('void*', $data_addr);
             \FFI::memcpy($data, $void_ptr, $info_count * 4);
 

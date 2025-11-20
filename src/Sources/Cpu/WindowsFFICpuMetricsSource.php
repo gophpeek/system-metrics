@@ -43,8 +43,23 @@ final class WindowsFFICpuMetricsSource implements CpuMetricsSource
 
             // Initialize FILETIME structures
             $idleTime = $ffi->new('FILETIME');
+            // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+            if ($idleTime === null) {
+                return null;
+            }
+
             $kernelTime = $ffi->new('FILETIME');
+            // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+            if ($kernelTime === null) {
+                return null;
+            }
+
             $userTime = $ffi->new('FILETIME');
+            // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
+            if ($userTime === null) {
+                return null;
+            }
+
 
             // Call GetSystemTimes
             $result = $ffi->GetSystemTimes( // @phpstan-ignore method.notFound (FFI methods defined via cdef)
