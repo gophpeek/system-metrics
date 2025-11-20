@@ -45,7 +45,7 @@ final class MacOsFFIUptimeSource implements UptimeSource
                 FFI::sizeof($boottime);
 
             $result = $ffi->sysctlbyname( // @phpstan-ignore method.notFound (FFI methods defined via cdef)
-                
+
                 'kern.boottime',
                 FFI::addr($boottime),
                 FFI::addr($size),
