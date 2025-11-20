@@ -34,7 +34,10 @@ final class CompositeStorageMetricsSource implements StorageMetricsSource
 
     private function getLinuxSource(): StorageMetricsSource
     {
-        return $this->linuxSource ?? new LinuxProcStorageMetricsSource;
+        return $this->linuxSource ?? new FallbackStorageMetricsSource([
+            new LinuxStatfsStorageMetricsSource,  // 1. FFI statfs64() (fast, no exec)
+            new LinuxProcStorageMetricsSource,    // 2. df command (fallback)
+        ]);
     }
 
     private function getMacosSource(): StorageMetricsSource
