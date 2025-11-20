@@ -33,7 +33,10 @@ final class CompositeMemoryMetricsSource implements MemoryMetricsSource
         }
 
         if (OsDetector::isMacOs()) {
-            return new MacOsVmStatMemoryMetricsSource;
+            return new FallbackMemoryMetricsSource([
+                new MacOsHostStatisticsMemorySource,  // 1. FFI (fast, accurate)
+                new MacOsVmStatMemoryMetricsSource,   // 2. vm_stat (older systems)
+            ]);
         }
 
         throw UnsupportedOperatingSystemException::forOs(OsDetector::getFamily());
