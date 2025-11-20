@@ -90,7 +90,6 @@ final class FreeBSDStatfsStorageMetricsSource implements StorageMetricsSource
             return [];
         }
 
-
         // @phpstan-ignore method.notFound (FFI methods defined via cdef)
         $count = $ffi->getmntinfo(FFI::addr($mntbuf), 1); // MNT_WAIT = 1
 
@@ -131,7 +130,6 @@ final class FreeBSDStatfsStorageMetricsSource implements StorageMetricsSource
         if ($buf === null) {
             return null;
         }
-
 
         // @phpstan-ignore method.notFound (FFI methods defined via cdef)
         $result = $ffi->statfs($path, FFI::addr($buf));
