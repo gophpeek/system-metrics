@@ -36,6 +36,10 @@ final class CompositeEnvironmentDetector implements EnvironmentDetector
             return new MacOsEnvironmentDetector;
         }
 
+        if (OsDetector::isWindows()) {
+            return new WindowsEnvironmentDetector;
+        }
+
         throw UnsupportedOperatingSystemException::forOs(OsDetector::getFamily());
     }
 }

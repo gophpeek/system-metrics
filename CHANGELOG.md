@@ -91,6 +91,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New `WindowsFFIStorageMetricsSource`
   - Note: Inode statistics not applicable on Windows (NTFS uses MFT records differently)
 
+  **Environment Detection** (Registry via FFI):
+  - Virtualization detection via Windows Registry (advapi32.dll)
+  - Detects Hyper-V, VMware, VirtualBox, KVM/QEMU
+  - Registry access via `RegOpenKeyExA()` and `RegQueryValueExA()`
+  - Checks `HKLM\HARDWARE\DESCRIPTION\System\SystemBiosVersion`
+  - Checks `HKLM\HARDWARE\DESCRIPTION\System\BIOS\SystemManufacturer`
+  - Checks `HKLM\SOFTWARE\Microsoft\Virtual Machine\Guest\Parameters` (Hyper-V)
+  - Container detection via environment variables and registry
+  - Docker detection via `DOCKER_CONTAINER` env and `C:\.dockerenv` file
+  - Windows container detection via `cexecsvc` service registry key
+  - New `WindowsEnvironmentDetector`
+  - Added `OsFamily::Windows` enum case
+  - Added `ArchitectureKind::X86` enum case for 32-bit Windows
+
 ### Changed
 
 - **BREAKING**: Renamed `CpuDelta` percentage methods for clarity

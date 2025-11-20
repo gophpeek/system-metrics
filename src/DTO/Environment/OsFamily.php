@@ -11,5 +11,6 @@ enum OsFamily: string
 {
     case Linux = 'linux';
     case MacOs = 'macos';
+    case Windows = 'windows';
     case Unknown = 'unknown';
 }
