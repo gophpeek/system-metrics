@@ -44,6 +44,10 @@ final class CompositeCpuMetricsSource implements CpuMetricsSource
             ]);
         }
 
+        if (OsDetector::isWindows()) {
+            return new WindowsFFICpuMetricsSource;
+        }
+
         throw UnsupportedOperatingSystemException::forOs(OsDetector::getFamily());
     }
 }

@@ -39,6 +39,10 @@ final class CompositeMemoryMetricsSource implements MemoryMetricsSource
             ]);
         }
 
+        if (OsDetector::isWindows()) {
+            return new WindowsFFIMemoryMetricsSource;
+        }
+
         throw UnsupportedOperatingSystemException::forOs(OsDetector::getFamily());
     }
 }

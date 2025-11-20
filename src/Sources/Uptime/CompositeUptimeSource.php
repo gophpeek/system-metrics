@@ -37,6 +37,12 @@ final class CompositeUptimeSource implements UptimeSource
             return $source->read();
         }
 
+        if (OsDetector::isWindows()) {
+            $source = new WindowsFFIUptimeSource;
+
+            return $source->read();
+        }
+
         /** @var Result<UptimeSnapshot> */
         return Result::failure(
             new SystemMetricsException('Uptime metrics not supported on this platform')

@@ -42,10 +42,10 @@ final class OsDetector
     }
 
     /**
-     * Check if the current OS is supported (Linux or macOS).
+     * Check if the current OS is supported (Linux, macOS, or Windows).
      */
     public static function isSupported(): bool
     {
-        return self::isLinux() || self::isMacOs();
+        return self::isLinux() || self::isMacOs() || self::isWindows();
     }
 }

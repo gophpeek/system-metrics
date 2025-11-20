@@ -60,6 +60,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `FallbackStorageMetricsSource` for graceful degradation when FFI unavailable
   
 
+- **Windows FFI Metrics - Native Win32 API Support**: All Windows metrics now use native FFI calls to kernel32.dll
+
+  **Memory Metrics** (`GlobalMemoryStatusEx()`):
+  - Fast native Win32 API (no WMI queries, no PowerShell)
+  - Single call returns complete memory statistics via `MEMORYSTATUSEX` structure
+  - Physical memory (total, available, used)
+  - Virtual memory/page file statistics
+  - New `WindowsFFIMemoryMetricsSource`
+
+  **Uptime** (`GetTickCount64()`):
+  - Native millisecond-precision uptime since boot
+  - Single Win32 API call (no WMI, no command execution)
+  - Calculates boot time from current time minus uptime
+  - New `WindowsFFIUptimeSource`
+
+  **CPU Metrics** (`GetSystemTimes()`):
+  - Native system-wide CPU time via FILETIME structures
+  - Converts Windows FILETIME (100ns intervals since 1601) to consistent tick format
+  - System, user, and idle time tracking
+  - New `WindowsFFICpuMetricsSource`
+  - Note: Per-core metrics not available from `GetSystemTimes()` (returns empty `perCore` array)
+
+  **Storage Metrics** (`GetDiskFreeSpaceEx()` + volume enumeration):
+  - Fast native Win32 volume APIs (no WMI)
+  - Enumerates drive letters (A-Z), filters by drive type
+  - Skips removable/network drives, focuses on fixed disks
+  - Gets space info via `GetDiskFreeSpaceEx()` (total, used, available bytes)
+  - Detects filesystem type via `GetVolumeInformationA()` (NTFS, FAT32, etc.)
+  - New `WindowsFFIStorageMetricsSource`
+  - Note: Inode statistics not applicable on Windows (NTFS uses MFT records differently)
+
 ### Changed
 
 - **BREAKING**: Renamed `CpuDelta` percentage methods for clarity
