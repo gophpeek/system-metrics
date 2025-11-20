@@ -48,7 +48,10 @@ final class MacOsHostStatisticsMemorySource implements MemoryMetricsSource
             $vm_info = $ffi->new('vm_statistics64_data_t');
             // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
             if ($vm_info === null) {
-                return null;
+                /** @var Result<MemorySnapshot> */
+                return Result::failure(
+                    new SystemMetricsException('Failed to allocate FFI memory')
+                );
             }
 
             $count = $ffi->new('mach_msg_type_number_t');
@@ -156,7 +159,7 @@ final class MacOsHostStatisticsMemorySource implements MemoryMetricsSource
         $memsize = $ffi->new('uint64_t');
         // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
         if ($memsize === null) {
-            return null;
+            return 0;
         }
 
 
@@ -187,7 +190,7 @@ final class MacOsHostStatisticsMemorySource implements MemoryMetricsSource
         $pagesize = $ffi->new('uint64_t');
         // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
         if ($pagesize === null) {
-            return null;
+            return 0;
         }
 
 

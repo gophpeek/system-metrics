@@ -60,19 +60,28 @@ final class MacOsHostProcessorInfoSource implements CpuMetricsSource
             $processor_count = $ffi->new('natural_t');
             // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
             if ($processor_count === null) {
-                return null;
+                /** @var Result<CpuSnapshot> */
+                return Result::failure(
+                    new SystemMetricsException('Failed to allocate FFI memory')
+                );
             }
 
             $processor_info_addr = $ffi->new('vm_address_t');
             // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
             if ($processor_info_addr === null) {
-                return null;
+                /** @var Result<CpuSnapshot> */
+                return Result::failure(
+                    new SystemMetricsException('Failed to allocate FFI memory')
+                );
             }
 
             $processor_info_count = $ffi->new('natural_t');
             // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
             if ($processor_info_count === null) {
-                return null;
+                /** @var Result<CpuSnapshot> */
+                return Result::failure(
+                    new SystemMetricsException('Failed to allocate FFI memory')
+                );
             }
 
 
@@ -103,7 +112,10 @@ final class MacOsHostProcessorInfoSource implements CpuMetricsSource
             $data = $ffi->new("int[{$info_count}]");
             // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
             if ($data === null) {
-                return null;
+                /** @var Result<CpuSnapshot> */
+                return Result::failure(
+                    new SystemMetricsException('Failed to allocate FFI memory')
+                );
             }
 
             $void_ptr = $ffi->cast('void*', $data_addr);

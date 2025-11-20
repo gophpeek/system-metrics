@@ -41,7 +41,10 @@ final class MacOsFFILoadAverageSource implements LoadAverageSource
             $loadavg = $ffi->new('double[3]');
             // @phpstan-ignore identical.alwaysFalse (FFI returns CData|null in some environments)
             if ($loadavg === null) {
-                return null;
+                /** @var Result<LoadAverageSnapshot> */
+                return Result::failure(
+                    new SystemMetricsException('Failed to allocate FFI memory')
+                );
             }
 
 
