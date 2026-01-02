@@ -43,11 +43,29 @@ final class FileReader implements FileReaderInterface
         '/System/',
         '/Library/',
 
-        // Test paths (for unit tests)
+        // Test paths (for unit tests) - Unix
         '/tmp/',
         '/var/folders/',  // macOS temp (symlinked)
         '/private/var/folders/',  // macOS temp (real path)
         '/private/tmp/',  // macOS temp alternative
+    ];
+
+    /**
+     * Windows-specific allowed path prefixes.
+     *
+     * Stored separately because Windows paths use different format.
+     *
+     * @var array<string>
+     */
+    private const WINDOWS_ALLOWED_PATH_PREFIXES = [
+        // Windows system paths
+        'C:\\Windows\\',
+
+        // Windows temp paths (for unit tests)
+        'C:\\Users\\',       // User temp directories
+        'C:\\Temp\\',        // System temp
+        'D:\\a\\',           // GitHub Actions workspace
+        'D:\\Temp\\',        // Alternative temp location
     ];
 
     /**
@@ -136,9 +154,20 @@ final class FileReader implements FileReaderInterface
      */
     private function isPathAllowed(string $path): bool
     {
+        // Check Unix-style paths
         foreach (self::ALLOWED_PATH_PREFIXES as $allowedPrefix) {
             if (str_starts_with($path, $allowedPrefix)) {
                 return true;
+            }
+        }
+
+        // Check Windows-style paths (case-insensitive)
+        if (PHP_OS_FAMILY === 'Windows') {
+            $normalizedPath = str_replace('/', '\\', $path);
+            foreach (self::WINDOWS_ALLOWED_PATH_PREFIXES as $allowedPrefix) {
+                if (stripos($normalizedPath, $allowedPrefix) === 0) {
+                    return true;
+                }
             }
         }
 
