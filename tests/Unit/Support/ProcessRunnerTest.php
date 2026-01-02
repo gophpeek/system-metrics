@@ -8,7 +8,9 @@ describe('ProcessRunner', function () {
         $result = $runner->execute('echo "test"');
 
         expect($result->isSuccess())->toBeTrue();
-        expect(trim($result->getValue()))->toBe('test');
+        // Windows echo keeps quotes, Unix strips them
+        $expected = PHP_OS_FAMILY === 'Windows' ? '"test"' : 'test';
+        expect(trim($result->getValue()))->toBe($expected);
     });
 
     it('can execute commands with multiple arguments', function () {
@@ -16,7 +18,9 @@ describe('ProcessRunner', function () {
         $result = $runner->execute('echo "hello world"');
 
         expect($result->isSuccess())->toBeTrue();
-        expect(trim($result->getValue()))->toBe('hello world');
+        // Windows echo keeps quotes, Unix strips them
+        $expected = PHP_OS_FAMILY === 'Windows' ? '"hello world"' : 'hello world';
+        expect(trim($result->getValue()))->toBe($expected);
     });
 
     it('returns failure for non-existent command', function () {
@@ -106,7 +110,9 @@ describe('ProcessRunner', function () {
         $result = $runner->execute('echo "12345"');
 
         expect($result->isSuccess())->toBeTrue();
-        expect(trim($result->getValue()))->toBe('12345');
+        // Windows echo keeps quotes, Unix strips them
+        $expected = PHP_OS_FAMILY === 'Windows' ? '"12345"' : '12345';
+        expect(trim($result->getValue()))->toBe($expected);
     });
 
     it('can execute command and get lines', function () {
