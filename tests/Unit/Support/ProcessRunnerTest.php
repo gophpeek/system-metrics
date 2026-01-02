@@ -193,4 +193,41 @@ describe('ProcessRunner', function () {
             expect($result->isFailure())->toBeTrue('Command should be rejected: '.$cmd);
         }
     });
+
+    it('allows lsof command for file descriptor counting', function () {
+        $runner = new ProcessRunner;
+        // lsof should be whitelisted
+        $result = $runner->execute('lsof -v');
+
+        // lsof -v might return non-zero on some systems, but shouldn't be rejected
+        // The important thing is it's not rejected as "not whitelisted"
+        expect($result->isFailure() ? $result->getError()->getMessage() : 'success')
+            ->not->toContain('not whitelisted');
+    });
+
+    it('allows nproc command for CPU count', function () {
+        $runner = new ProcessRunner;
+
+        if (PHP_OS_FAMILY === 'Linux') {
+            $result = $runner->execute('nproc');
+            expect($result->isSuccess())->toBeTrue();
+            expect((int) trim($result->getValue()))->toBeGreaterThan(0);
+        } else {
+            // On non-Linux, nproc should still be whitelisted (command not found is different from not whitelisted)
+            $result = $runner->execute('nproc');
+            // Always assert something - either success or that failure is not due to whitelist
+            expect($result->isFailure() ? $result->getError()->getMessage() : 'success')
+                ->not->toContain('not whitelisted');
+        }
+    });
+
+    it('allows getconf command for system configuration', function () {
+        $runner = new ProcessRunner;
+        $result = $runner->execute('getconf PAGESIZE');
+
+        if (PHP_OS_FAMILY !== 'Windows') {
+            expect($result->isSuccess())->toBeTrue();
+            expect((int) trim($result->getValue()))->toBeGreaterThan(0);
+        }
+    });
 });
