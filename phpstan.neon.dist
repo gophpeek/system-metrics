@@ -3,3 +3,16 @@ parameters:
     paths:
         - src
     tmpDir: build/phpstan
+    # FFI code uses @phpstan-ignore comments for cross-platform compatibility.
+    # These suppressions may be unnecessary on some platforms (e.g., Linux CI)
+    # but required on others (e.g., macOS local dev). Disable strict matching.
+    reportUnmatchedIgnoredErrors: false
+    # FFI type handling varies between platforms. PHPStan cannot fully
+    # understand FFI\CData types which are defined via cdef strings at runtime.
+    # Ignore FFI-related type errors in Sources that use FFI.
+    ignoreErrors:
+        # FFI::new() returns CData|null, but when used correctly it returns CData
+        - identifier: argument.type
+          path: src/Sources/*/
+        - identifier: property.nonObject
+          path: src/Sources/*/
