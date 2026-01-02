@@ -80,6 +80,9 @@ describe('ProcessRunner', function () {
             $result = $runner->execute('uname');
             expect($result->isSuccess())->toBeTrue();
             expect(trim($result->getValue()))->toBe('Linux');
+        } else {
+            // Windows and other platforms - just verify the runner exists
+            expect($runner)->toBeInstanceOf(ProcessRunner::class);
         }
     });
 
@@ -176,12 +179,13 @@ describe('ProcessRunner', function () {
         if (PHP_OS_FAMILY === 'Darwin') {
             $result = $runner->execute('sysctl -n hw.ncpu');
             expect($result->isSuccess())->toBeTrue();
-        }
-
-        // Test Linux commands
-        if (PHP_OS_FAMILY === 'Linux' && file_exists('/proc/cpuinfo')) {
+        } elseif (PHP_OS_FAMILY === 'Linux' && file_exists('/proc/cpuinfo')) {
+            // Test Linux commands
             $result = $runner->execute('cat /proc/cpuinfo');
             expect($result->isSuccess())->toBeTrue();
+        } else {
+            // Windows and other platforms - just verify the runner exists
+            expect($runner)->toBeInstanceOf(ProcessRunner::class);
         }
     });
 
@@ -229,11 +233,14 @@ describe('ProcessRunner', function () {
 
     it('allows getconf command for system configuration', function () {
         $runner = new ProcessRunner;
-        $result = $runner->execute('getconf PAGESIZE');
 
         if (PHP_OS_FAMILY !== 'Windows') {
+            $result = $runner->execute('getconf PAGESIZE');
             expect($result->isSuccess())->toBeTrue();
             expect((int) trim($result->getValue()))->toBeGreaterThan(0);
+        } else {
+            // Windows doesn't have getconf - just verify the runner exists
+            expect($runner)->toBeInstanceOf(ProcessRunner::class);
         }
     });
 });
