@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace PHPeek\SystemMetrics\Support\Parser;
 
 use DateTimeImmutable;
+use PHPeek\SystemMetrics\Contracts\ProcessRunnerInterface;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuTimes;
 use PHPeek\SystemMetrics\DTO\Metrics\Process\ProcessResourceUsage;
 use PHPeek\SystemMetrics\DTO\Metrics\Process\ProcessSnapshot;
 use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Exceptions\ParseException;
+use PHPeek\SystemMetrics\Support\ProcessRunner;
 
 /**
  * Parses macOS ps command output for process metrics.
@@ -20,6 +22,10 @@ use PHPeek\SystemMetrics\Exceptions\ParseException;
  */
 final class MacOsPsParser
 {
+    public function __construct(
+        private readonly ProcessRunnerInterface $processRunner = new ProcessRunner,
+    ) {}
+
     /**
      * Parse ps command output into ProcessSnapshot.
      *
@@ -100,6 +106,9 @@ final class MacOsPsParser
     /**
      * Count open file descriptors for a process using lsof.
      *
+     * Uses ProcessRunner for consistent command execution through the
+     * security whitelist. Counts lines in PHP rather than using shell pipes.
+     *
      * @return int Number of open file descriptors, or 0 if unable to determine
      */
     private function countFileDescriptors(int $pid): int
@@ -108,14 +117,21 @@ final class MacOsPsParser
         // -p PID: specify process
         // -n: no hostname resolution (faster)
         // -P: no port name resolution (faster)
-        $command = "lsof -p {$pid} -n -P 2>/dev/null | tail -n +2 | wc -l";
-        $output = @shell_exec($command);
+        $result = $this->processRunner->execute("lsof -p {$pid} -n -P");
 
-        if ($output === null || $output === false) {
+        if ($result->isFailure()) {
             return 0;
         }
 
-        return max(0, (int) trim($output));
+        $output = $result->getValue();
+        if ($output === '') {
+            return 0;
+        }
+
+        // Count lines, skipping header (first line)
+        $lines = explode("\n", trim($output));
+
+        return max(0, count($lines) - 1);
     }
 
     /**

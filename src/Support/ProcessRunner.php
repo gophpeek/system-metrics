@@ -39,6 +39,9 @@ final class ProcessRunner implements ProcessRunnerInterface
         'ps',
         'pgrep',
         'top',
+        'lsof',    // File descriptor counting
+        'nproc',   // CPU core count (Linux)
+        'getconf', // System configuration (page size, etc.)
 
         // Linux system commands
         'cat /proc/',
