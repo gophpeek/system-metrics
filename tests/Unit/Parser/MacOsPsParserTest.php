@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use PHPeek\SystemMetrics\Contracts\ProcessRunnerInterface;
+use PHPeek\SystemMetrics\DTO\Result;
 use PHPeek\SystemMetrics\Exceptions\ParseException;
 use PHPeek\SystemMetrics\Support\Parser\MacOsPsParser;
 
@@ -211,6 +213,98 @@ PS;
 
     expect($result->isSuccess())->toBeTrue();
     expect($result->getValue()->timestamp)->toBeInstanceOf(DateTimeImmutable::class);
+});
+
+it('uses ProcessRunner for file descriptor counting', function () {
+    // Create a mock ProcessRunner that returns a known lsof output
+    $mockRunner = new class implements ProcessRunnerInterface
+    {
+        public bool $lsofCalled = false;
+
+        public string $lastCommand = '';
+
+        public function execute(string $command): Result
+        {
+            $this->lastCommand = $command;
+            if (str_starts_with($command, 'lsof')) {
+                $this->lsofCalled = true;
+                // Simulate lsof output: header + 5 file descriptors
+                $output = "COMMAND  PID    USER   FD   TYPE DEVICE SIZE/OFF NODE NAME\n";
+                $output .= "php     1234   user    0u   CHR  16,0      0t0  661 /dev/ttys000\n";
+                $output .= "php     1234   user    1u   CHR  16,0      0t0  661 /dev/ttys000\n";
+                $output .= "php     1234   user    2u   CHR  16,0      0t0  661 /dev/ttys000\n";
+                $output .= "php     1234   user    3r   REG    1,5     1234   12 /some/file\n";
+                $output .= "php     1234   user    4w   REG    1,5     5678   34 /another/file\n";
+
+                return Result::success($output);
+            }
+
+            return Result::success('');
+        }
+
+        public function executeLines(string $command): Result
+        {
+            return $this->execute($command)->map(fn ($output) => array_values(array_filter(explode("\n", $output), fn ($line) => $line !== '')));
+        }
+
+        public function commandExists(string $command): bool
+        {
+            return true;
+        }
+    };
+
+    $parser = new MacOsPsParser($mockRunner);
+
+    $output = <<<'PS'
+  PID  PPID    RSS      VSZ      TIME
+ 1234     1  10240    20480  00:01:30
+PS;
+
+    $result = $parser->parse($output, 1234);
+
+    expect($result->isSuccess())->toBeTrue();
+    expect($mockRunner->lsofCalled)->toBeTrue();
+    expect($mockRunner->lastCommand)->toBe('lsof -p 1234 -n -P');
+    // 5 lines after header = 5 file descriptors
+    expect($result->getValue()->resources->openFileDescriptors)->toBe(5);
+});
+
+it('handles lsof failure gracefully', function () {
+    // Create a mock ProcessRunner that simulates lsof failure
+    $mockRunner = new class implements ProcessRunnerInterface
+    {
+        public function execute(string $command): Result
+        {
+            if (str_starts_with($command, 'lsof')) {
+                return Result::failure(new \PHPeek\SystemMetrics\Exceptions\SystemMetricsException('lsof failed'));
+            }
+
+            return Result::success('');
+        }
+
+        public function executeLines(string $command): Result
+        {
+            return $this->execute($command)->map(fn ($output) => []);
+        }
+
+        public function commandExists(string $command): bool
+        {
+            return true;
+        }
+    };
+
+    $parser = new MacOsPsParser($mockRunner);
+
+    $output = <<<'PS'
+  PID  PPID    RSS      VSZ      TIME
+ 1234     1  10240    20480  00:01:30
+PS;
+
+    $result = $parser->parse($output, 1234);
+
+    expect($result->isSuccess())->toBeTrue();
+    // When lsof fails, openFileDescriptors should be 0
+    expect($result->getValue()->resources->openFileDescriptors)->toBe(0);
 });
 
 it('handles large memory values', function () {

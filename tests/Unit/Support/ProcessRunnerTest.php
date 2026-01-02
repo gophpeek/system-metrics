@@ -8,7 +8,9 @@ describe('ProcessRunner', function () {
         $result = $runner->execute('echo "test"');
 
         expect($result->isSuccess())->toBeTrue();
-        expect(trim($result->getValue()))->toBe('test');
+        // Windows echo keeps quotes, Unix strips them
+        $expected = PHP_OS_FAMILY === 'Windows' ? '"test"' : 'test';
+        expect(trim($result->getValue()))->toBe($expected);
     });
 
     it('can execute commands with multiple arguments', function () {
@@ -16,7 +18,9 @@ describe('ProcessRunner', function () {
         $result = $runner->execute('echo "hello world"');
 
         expect($result->isSuccess())->toBeTrue();
-        expect(trim($result->getValue()))->toBe('hello world');
+        // Windows echo keeps quotes, Unix strips them
+        $expected = PHP_OS_FAMILY === 'Windows' ? '"hello world"' : 'hello world';
+        expect(trim($result->getValue()))->toBe($expected);
     });
 
     it('returns failure for non-existent command', function () {
@@ -76,6 +80,9 @@ describe('ProcessRunner', function () {
             $result = $runner->execute('uname');
             expect($result->isSuccess())->toBeTrue();
             expect(trim($result->getValue()))->toBe('Linux');
+        } else {
+            // Windows and other platforms - just verify the runner exists
+            expect($runner)->toBeInstanceOf(ProcessRunner::class);
         }
     });
 
@@ -106,7 +113,9 @@ describe('ProcessRunner', function () {
         $result = $runner->execute('echo "12345"');
 
         expect($result->isSuccess())->toBeTrue();
-        expect(trim($result->getValue()))->toBe('12345');
+        // Windows echo keeps quotes, Unix strips them
+        $expected = PHP_OS_FAMILY === 'Windows' ? '"12345"' : '12345';
+        expect(trim($result->getValue()))->toBe($expected);
     });
 
     it('can execute command and get lines', function () {
@@ -170,12 +179,13 @@ describe('ProcessRunner', function () {
         if (PHP_OS_FAMILY === 'Darwin') {
             $result = $runner->execute('sysctl -n hw.ncpu');
             expect($result->isSuccess())->toBeTrue();
-        }
-
-        // Test Linux commands
-        if (PHP_OS_FAMILY === 'Linux' && file_exists('/proc/cpuinfo')) {
+        } elseif (PHP_OS_FAMILY === 'Linux' && file_exists('/proc/cpuinfo')) {
+            // Test Linux commands
             $result = $runner->execute('cat /proc/cpuinfo');
             expect($result->isSuccess())->toBeTrue();
+        } else {
+            // Windows and other platforms - just verify the runner exists
+            expect($runner)->toBeInstanceOf(ProcessRunner::class);
         }
     });
 
@@ -191,6 +201,46 @@ describe('ProcessRunner', function () {
         foreach ($dangerousCommands as $cmd) {
             $result = $runner->execute($cmd);
             expect($result->isFailure())->toBeTrue('Command should be rejected: '.$cmd);
+        }
+    });
+
+    it('allows lsof command for file descriptor counting', function () {
+        $runner = new ProcessRunner;
+        // lsof should be whitelisted
+        $result = $runner->execute('lsof -v');
+
+        // lsof -v might return non-zero on some systems, but shouldn't be rejected
+        // The important thing is it's not rejected as "not whitelisted"
+        expect($result->isFailure() ? $result->getError()->getMessage() : 'success')
+            ->not->toContain('not whitelisted');
+    });
+
+    it('allows nproc command for CPU count', function () {
+        $runner = new ProcessRunner;
+
+        if (PHP_OS_FAMILY === 'Linux') {
+            $result = $runner->execute('nproc');
+            expect($result->isSuccess())->toBeTrue();
+            expect((int) trim($result->getValue()))->toBeGreaterThan(0);
+        } else {
+            // On non-Linux, nproc should still be whitelisted (command not found is different from not whitelisted)
+            $result = $runner->execute('nproc');
+            // Always assert something - either success or that failure is not due to whitelist
+            expect($result->isFailure() ? $result->getError()->getMessage() : 'success')
+                ->not->toContain('not whitelisted');
+        }
+    });
+
+    it('allows getconf command for system configuration', function () {
+        $runner = new ProcessRunner;
+
+        if (PHP_OS_FAMILY !== 'Windows') {
+            $result = $runner->execute('getconf PAGESIZE');
+            expect($result->isSuccess())->toBeTrue();
+            expect((int) trim($result->getValue()))->toBeGreaterThan(0);
+        } else {
+            // Windows doesn't have getconf - just verify the runner exists
+            expect($runner)->toBeInstanceOf(ProcessRunner::class);
         }
     });
 });

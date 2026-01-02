@@ -19,8 +19,13 @@ final class MacOsPsProcessMetricsSource implements ProcessMetricsSource
 {
     public function __construct(
         private readonly ProcessRunnerInterface $processRunner = new ProcessRunner,
-        private readonly MacOsPsParser $parser = new MacOsPsParser,
+        private readonly ?MacOsPsParser $parser = null,
     ) {}
+
+    private function getParser(): MacOsPsParser
+    {
+        return $this->parser ?? new MacOsPsParser($this->processRunner);
+    }
 
     public function read(int $pid): Result
     {
@@ -35,7 +40,7 @@ final class MacOsPsProcessMetricsSource implements ProcessMetricsSource
             return Result::failure($error);
         }
 
-        return $this->parser->parse($result->getValue(), $pid);
+        return $this->getParser()->parse($result->getValue(), $pid);
     }
 
     public function readProcessGroup(int $rootPid): Result

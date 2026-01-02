@@ -23,11 +23,10 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        php: [8.3, 8.4]
+        php: [8.3, 8.4, 8.5]
         stability: [prefer-lowest, prefer-stable]
-        exclude:
-          # FreeBSD not available in GitHub Actions, use FreeBSD Docker container instead
-          # See e2e-tests job for FreeBSD testing via Docker
+        # Note: FreeBSD not available in GitHub Actions, use FreeBSD Docker container instead
+        # See e2e-tests job for FreeBSD testing via Docker
 
     name: Unit Tests - P${{ matrix.php }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
@@ -70,7 +69,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [8.3, 8.4]
+        php: [8.3, 8.4, 8.5]
 
     name: E2E Tests - P${{ matrix.php }} - Linux/Docker
 

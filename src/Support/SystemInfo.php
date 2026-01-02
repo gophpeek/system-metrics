@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace PHPeek\SystemMetrics\Support;
 
+use PHPeek\SystemMetrics\Contracts\ProcessRunnerInterface;
+
 /**
  * Provides system-level information and configuration.
+ *
+ * Uses ProcessRunner for consistent command execution through the
+ * security whitelist, even for simple system info queries.
  */
 final class SystemInfo
 {
     private static ?int $pageSize = null;
+
+    private static ?ProcessRunnerInterface $processRunner = null;
 
     /**
      * Get the system page size in bytes.
@@ -28,9 +35,10 @@ final class SystemInfo
         }
 
         // Try to get page size from getconf command
-        $result = @shell_exec('getconf PAGESIZE 2>/dev/null');
-        if ($result !== null && $result !== false) {
-            $pageSize = (int) trim($result);
+        $runner = self::getProcessRunner();
+        $result = $runner->execute('getconf PAGESIZE');
+        if ($result->isSuccess()) {
+            $pageSize = (int) trim($result->getValue());
             if ($pageSize > 0) {
                 self::$pageSize = $pageSize;
 
@@ -60,5 +68,22 @@ final class SystemInfo
     public static function reset(): void
     {
         self::$pageSize = null;
+        self::$processRunner = null;
+    }
+
+    /**
+     * Set a custom ProcessRunner (useful for testing).
+     */
+    public static function setProcessRunner(ProcessRunnerInterface $runner): void
+    {
+        self::$processRunner = $runner;
+    }
+
+    /**
+     * Get the ProcessRunner instance.
+     */
+    private static function getProcessRunner(): ProcessRunnerInterface
+    {
+        return self::$processRunner ?? new ProcessRunner;
     }
 }

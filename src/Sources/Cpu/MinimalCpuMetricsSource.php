@@ -5,34 +5,31 @@ declare(strict_types=1);
 namespace PHPeek\SystemMetrics\Sources\Cpu;
 
 use PHPeek\SystemMetrics\Contracts\CpuMetricsSource;
+use PHPeek\SystemMetrics\Contracts\ProcessRunnerInterface;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuCoreTimes;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuSnapshot;
 use PHPeek\SystemMetrics\DTO\Metrics\Cpu\CpuTimes;
 use PHPeek\SystemMetrics\DTO\Result;
+use PHPeek\SystemMetrics\Support\ProcessRunner;
 
 /**
  * Returns zero-filled CPU metrics as a last-resort fallback.
  *
  * This source always succeeds but provides no actual metrics.
  * Useful as the final fallback when all other CPU sources fail.
+ *
+ * Uses ProcessRunner for consistent command execution through the
+ * security whitelist, even for simple fallback operations.
  */
 final class MinimalCpuMetricsSource implements CpuMetricsSource
 {
+    public function __construct(
+        private readonly ProcessRunnerInterface $processRunner = new ProcessRunner,
+    ) {}
+
     public function read(): Result
     {
-        // Get CPU count via sysctl if possible, otherwise default to 1
-        $coreCount = 1;
-        if (PHP_OS_FAMILY === 'Darwin') {
-            $output = shell_exec('sysctl -n hw.ncpu 2>/dev/null');
-            if ($output !== null && $output !== false) {
-                $coreCount = max(1, (int) trim($output));
-            }
-        } elseif (PHP_OS_FAMILY === 'Linux') {
-            $output = shell_exec('nproc 2>/dev/null');
-            if ($output !== null && $output !== false) {
-                $coreCount = max(1, (int) trim($output));
-            }
-        }
+        $coreCount = $this->detectCoreCount();
 
         // Create zero-filled CPU times
         $zeroTimes = new CpuTimes(
@@ -59,5 +56,27 @@ final class MinimalCpuMetricsSource implements CpuMetricsSource
             total: $zeroTimes,
             perCore: $perCore
         ));
+    }
+
+    /**
+     * Detect CPU core count using OS-specific commands.
+     *
+     * Falls back to 1 if detection fails.
+     */
+    private function detectCoreCount(): int
+    {
+        if (PHP_OS_FAMILY === 'Darwin') {
+            $result = $this->processRunner->execute('sysctl -n hw.ncpu');
+            if ($result->isSuccess()) {
+                return max(1, (int) trim($result->getValue()));
+            }
+        } elseif (PHP_OS_FAMILY === 'Linux') {
+            $result = $this->processRunner->execute('nproc');
+            if ($result->isSuccess()) {
+                return max(1, (int) trim($result->getValue()));
+            }
+        }
+
+        return 1;
     }
 }
